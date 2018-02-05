@@ -1,0 +1,128 @@
+﻿
+
+.jqstooltip {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    visibility: hidden;
+    background: rgb(0, 0, 0) transparent;
+    background-color: rgba(0,0,0,0.6);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";
+    color: white;
+    font: 10px arial, san serif;
+    text-align: left;
+    white-space: nowrap;
+    padding: 5px;
+    border: 1px solid white;
+    z-index: 10000;
+}
+
+.jqsfield {
+    color: white;
+    font: 10px arial, san serif;
+    text-align: left;
+}
+
+.J_iframe {
+    width: 100%;
+    height: 100%;
+}
+
+.content-tabs {
+    position: relative;
+    height: 42px;
+    background: #fafafa;
+    line-height: 40px
+}
+
+    .content-tabs .roll-nav,
+    .page-tabs-list {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        color: #999;
+        z-index: 2;
+        top: 0
+    }
+
+    .content-tabs .roll-left {
+        left: 0;
+        border-right: solid 1px #eee
+    }
+
+    .content-tabs .roll-right {
+        right: 0;
+        border-left: solid 1px #eee
+    }
+
+    .content-tabs button {
+        background: #fff;
+        border: 0;
+        height: 40px;
+        width: 40px;
+        outline: 0
+    }
+
+        .content-tabs button:hover {
+            background: #fafafa
+        }
+.content-toolbar>.btn{
+    margin-left:5px;
+}
+
+nav.page-tabs {
+    margin-left: 40px;
+    width: 100000px;
+    height: 40px;
+    overflow: hidden
+}
+
+    nav.page-tabs .page-tabs-content {
+        float: left
+    }
+
+.page-tabs a {
+    display: block;
+    float: left;
+    border-right: solid 1px #eee;
+    padding: 0 15px;
+    color: #999;
+}
+
+    .page-tabs a i:hover {
+        color: #c00
+    }
+
+    .content-tabs .roll-nav:hover,
+    .page-tabs a:hover {
+        color: #777;
+        background: #f2f2f2;
+        cursor: pointer
+    }
+
+    .page-tabs a.active {
+        background: #2f4050;
+        color: #a7b1c2;
+    }
+
+.roll-right.btn-group {
+    /*right: 60px;*/
+    width: 80px;
+    padding: 0
+}
+
+    .roll-right.btn-group button {
+        width: 80px
+    }
+
+.roll-right.J_tabExit {
+    background: #fff;
+    height: 40px;
+    width: 60px;
+    outline: 0
+}
+.roll-right.J_tabRight {
+    right: 80px
+}

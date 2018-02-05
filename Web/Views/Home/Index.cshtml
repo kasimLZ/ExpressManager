@@ -1,0 +1,122 @@
+﻿@using Common
+@model ICurrentUser
+@{
+    var userinfo = DependencyResolver.Current.GetService<ICurrentUser>();
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+
+    @Styles.Render("~/Style")
+</head>
+<body class=" pace-done">
+    <div class="pace  pace-inactive">
+        <div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px);">
+            <div class="pace-progress-inner"></div>
+        </div>
+        <div class="pace-activity"></div>
+    </div>
+    <div id="wrapper">
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <span>
+                                <img alt="image" class="img-circle" src="img/profile_small.jpg">
+                            </span>
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="javascript:;">
+                                <span class="clear">
+                                    <span class="block m-t-xs">
+                                        <strong class="font-bold">@Model.Name</strong>
+                                    </span> <span class="text-muted text-xs block">Tools<b class="caret"></b></span>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                <li class="divider"></li>
+                                <li><a href="/Account/Logout">Logout</a></li>
+                            </ul>
+                        </div>
+                        <div class="logo-element">
+                            IN+
+                        </div>
+                    </li>
+                    @Html.CreateMenuList(Url, Model)
+                </ul>
+
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg dashbard-1" style="min-height: 794px;">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="javascript:;"><i class="fa fa-bars"></i> </a>
+                        <form role="search" class="navbar-form-custom" action="search_results.html">
+                            <div class="form-group">
+                                <input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search">
+                            </div>
+                        </form>
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">Welcome to INSPINIA+ Admin Theme.</span>
+                        </li>
+                        <li>
+                            <a href="/Account/Logout">
+                                <i class="fa fa-sign-out"></i> Log out
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="row content-tabs">
+                <button class="roll-nav roll-left J_tabLeft">
+                    <i class="fa fa-backward"></i>
+                </button>
+                <nav class="page-tabs J_menuTabs">
+                    <div class="page-tabs-content">
+                    </div>
+                </nav>
+                <button class="roll-nav roll-right J_tabRight">
+                    <i class="fa fa-forward"></i>
+                </button>
+                <div class="btn-group roll-nav roll-right">
+                    <button class="dropdown J_tabClose" data-toggle="dropdown">Close<span class="caret"></span></button>
+                    <ul role="menu" class="dropdown-menu dropdown-menu-right" style="left:auto">
+                        <li class="J_tabShowActive"><a>Local Current</a></li>
+                        <li class="divider"></li>
+                        <li class="J_tabCloseAll"><a>Close All</a></li>
+                        <li class="J_tabCloseOther"><a>Close Others</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="J_mainContent" class="row border-bottom white-bg dashboard-header"></div>
+            <div class="footer">
+                <div class="pull-right" id='localtime'>
+                </div>
+                <div>
+                    <strong>Copyright</strong> Example Company © 2014-2015
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.paceOptions = { ajax: { trackMethods: ['GET', 'POST'] }, eventLag: false, elements: false }
+    </script>
+    @Scripts.Render("~/Script")
+    <script src="~/Content/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Content/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Content/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script>
+        $(function () {
+            Core.Init();
+
+        })
+    </script>
+</body>
+</html>

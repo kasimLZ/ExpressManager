@@ -1,0 +1,90 @@
+﻿@using System.Reflection
+@model System.Collections.IEnumerable
+@{
+    IPagedList PageListModel = Model as IPagedList;
+    string primaryKey = Model.GetElementType().IdentifierPropertyName();
+
+    var _hideFields = (ViewData["_HideFields"] as string[]);
+    if (_hideFields == null) { _hideFields = new string[0] { }; }
+    var _showFields = (ViewData["_ShowFields"] as string[]);
+    if (_showFields == null) { _showFields = new string[0] { }; }
+
+
+    var field_infos = Model.VisibleProperties(_hideFields, _showFields.MergerArrays(new string[] { primaryKey }));
+
+    var Buttons = Html.GetUserButtons();
+    List<SysAction> Inline = Buttons.Where(a => a.ButtonType == ButtonTypes.InlineButton).ToList();
+
+
+    if (PageListModel != null)
+    {
+        ViewData["_PageIndex"] = PageListModel.PageIndex;
+        ViewData["_PageSize"] = PageListModel.PageSize;
+        ViewData["_TotalCount"] = PageListModel.TotalCount;
+    }
+}
+<script>
+    Core.loadScript("Test", function () {
+
+    })
+</script>
+
+@Html.Partial("Search_Input", (PageListModel != null ? PageListModel.EntityType : Model.GetElementType()).CreateInstance(Request.QueryString))
+
+@Url.RenderToolbar(Buttons.Where(a => a.ButtonType == ButtonTypes.PageButton))
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" class="selectAll" />
+                    </th>
+                    @foreach (PropertyInfo title in field_infos)
+                    {
+                        if (title.Name.Equals(primaryKey))
+                        {
+                            <th>Action</th>
+                        }
+                        else
+                        {
+                            <th>@title.GetLabel().ToSeparatedWords()</th>
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    ViewData["DataList"] = item;
+                    var primaryValue = item.GetType().GetProperty(primaryKey).GetValue(item);
+                    <tr>
+                        <td><input name="btSelectItem" type="checkbox" value="@primaryValue"></td>
+                        @foreach (PropertyInfo title in field_infos)
+                        {
+                            if (title.Name.Equals(primaryKey))
+                            {
+                                <td>
+                                    @Url.RenderInlineButton(Inline, primaryValue)
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    @Html.Display("DataList." + title.Name)
+                                </td>
+                            }
+                        }
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+@if (ViewData["_PageIndex"] is int && ViewData["_PageSize"] is int && ViewData["_TotalCount"] is int)
+{
+    @Html.Raw(Html.HashPager((int)ViewData["_PageIndex"], (int)ViewData["_PageSize"], (int)ViewData["_TotalCount"]))
+}
+

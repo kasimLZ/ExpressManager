@@ -1,0 +1,11 @@
+﻿@*<textarea class="form-control">
+
+    </textarea>*@
+
+@model string
+@Html.TextAreaFor(a=>a)
+
+<script>
+    var u_@(Html.NameForModel()) = UE.getEditor('@Html.NameForModel()', { "allowDivTransToP": true, "wordCount": false });
+</script>
+

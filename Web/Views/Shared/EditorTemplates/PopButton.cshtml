@@ -1,0 +1,101 @@
+﻿@model string
+
+<input type="button" placeholder="" class="form-control" style="text-align:left;width:100%;" id="@Html.NameForModel()" name="@Html.NameForModel()"  value="@Html.ValueForModel()">
+
+
+<div class="modal inmodal " id="myModal" data-field="" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" style="width:800px;height:800px;">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" id="btnClose" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">关闭</span>
+                </button>
+                <div class="input-group m-b">
+                    <input type="text" id="SearchName" name="SearchName" class="form-control" style="width:300px;" placeholder="">
+                    <button type="button" id="btnSearch" class="btn btn-primary" onclick="Pop.Search()">搜索</button>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <table cellpadding="0" align="center" class="listshow" border="0" cellspacing="0">
+                    <tr>
+                        <td class="black" align="center">
+                            <select id="fb_list" multiple="multiple" style="width:350px;height:410px;"></select>
+                        </td>
+                        <td width="2%" align="center">
+                            <input type="button" class="btn btn-info" id="add" value="添加>>" />
+                            <input type="button" class="btn btn-white" id="delete" value="<<删除" />
+                        </td>
+                        <td class="black" align="center">
+                            <select id="select_list" multiple="multiple" style="width:350px;height:410px;"></select>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal" id="close">关闭</button>
+                <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-save"></i>保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $("#@Html.NameForModel()").on("click", function () {
+        var arrName = '@Html.NameForModel()'.split('_');
+        if (arrName.length <= 0) return;
+        var hiddenId = arrName[0] + "_id";
+        $("#myModal").attr("data-field", hiddenId);
+        
+        $.ajax({
+            type: "Post",
+            url: "/ChargeExplain/JudgeRule/Get" + hiddenId,//TODO
+            data: {},
+            datatype: "json",
+            success: function (data) {
+
+                var str = "";
+                if (data != null) {
+                    for (var i = 0; i < data.length; i++) {
+
+                        if (data[i].Id.length > 5) {
+                            str += "<option value=" + data[i].Id + ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + data[i].Name + "</option>"
+                        } else if (data[i].Id.length > 3) {
+                            str += "<option value=" + data[i].Id + ">&nbsp;&nbsp;&nbsp;&nbsp;" + data[i].Name + "</option>"
+                        }
+                        else {
+
+                            str += "<option value=" + data[i].Id + ">" + data[i].Name + "</option>"
+                        }
+                    }
+                    $("#fb_list").html(str);
+                }
+            }
+        });
+
+        if ($("#" + hiddenId).val() != "" && $("#" + hiddenId).val() != null && $("#" + hiddenId).val() != "/") {
+            var str = "";
+            var txtSortArr = $("#" + hiddenId).val().substring(1, $("#" + hiddenId).val().length).split('/');
+            var txtSortNameArr = $("#@Html.NameForModel()").val().split(',');
+
+            for (var i = 0; i < txtSortNameArr.length; i++) {
+                if (txtSortArr[i].length > 5) {
+                    str += "<option value=" + txtSortArr[i] + ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + txtSortNameArr[i] + "</option>"
+                } else if (txtSortArr[i].length > 3) {
+                    str += "<option value=" + txtSortArr[i] + ">&nbsp;&nbsp;&nbsp;&nbsp;" + txtSortNameArr[i] + "</option>"
+                }
+                else {
+                    str += "<option value=" + txtSortArr[i] + ">" + txtSortNameArr[i] + "</option>"
+                }
+            }
+            $("#select_list").html(str);
+        }
+
+        $("#myModal").show();
+
+    });
+
+</script>
+

@@ -1,0 +1,14 @@
+﻿@model SelectList
+@{
+    var attributes = new RouteValueDictionary
+                  {
+                     { "class", "show-tick form-control"}
+                  };
+
+    var metaData = ViewData.ContainsKey("ModelMetadata") ? ViewData["ModelMetadata"] as ModelMetadata : ViewData.ModelMetadata;
+    if (HtmlHelper.ClientValidationEnabled && metaData.IsRequired)
+    {
+        attributes.Add("required", "");
+    }
+}
+@Html.DropDownListFor(a => a, Model, attributes)
