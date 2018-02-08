@@ -11,6 +11,9 @@ namespace Web.Areas.SysManager.Controllers
 {
     public class SysAreaController : SmartController<SysArea>
     {
+        public ActionResult Lookup() {
 
+            return View();
+        }
     }
 }

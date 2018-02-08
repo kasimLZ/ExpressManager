@@ -59,6 +59,13 @@ namespace Common
             return Htmlstring;
         }
 
+        public static String ViewElementId(this string name)
+        {
+            int sec = DateTime.Now.Millisecond;
+            long number = new Random(sec).Next(0, int.MaxValue);
+            return name + (string.IsNullOrEmpty(name) ?"" : "_") + (((long)sec << BitConverter.GetBytes(number).Length) | number).ToString();
+        }
+
 
     }
 }

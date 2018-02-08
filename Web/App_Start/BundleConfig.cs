@@ -29,6 +29,7 @@ namespace Web
 
             bundles.Add(new ScriptBundle("~/Script").Include(
                     "~/Content/Scripts/jquery-1.10.2.min.js",
+                    "~/Content/Scripts/chosen/chosen.jquery.js",
                     "~/Content/Scripts/bootstrap.min.js",
                     "~/Content/Scripts/metisMenu/jquery.metisMenu.js",
                     "~/Content/Scripts/slimscroll/jquery.slimscroll.min.js",
@@ -48,6 +49,7 @@ namespace Web
 
             bundles.Add(new StyleBundle("~/Style").Include(
                    "~/Content/Css/bootstrap.min.css",
+                   "~/Content/Css/chosen/chosen.css",
                    "~/Content/fonts/font-awesome/css/font-awesome.min.css",
                    "~/Content/CSS/style.css",
                    "~/Content/Css/Site.css",

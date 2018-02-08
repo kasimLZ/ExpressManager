@@ -90,7 +90,9 @@
                 count++;
             },
             hide: function () {
-                count--;
+                if (count > 0) {
+                    count--;
+                }
                 if (count == 0) {
                     $("#" + id).remove();
                     id = null;

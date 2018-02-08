@@ -250,20 +250,20 @@
 
     var DefaultBtnAction = {
         Refresh: function () {
-            App.Refersh();
+            Core.Refersh();
         },
         Delete: function () {
-            var ids = App.GetSelectId();
-            if (ids.length == 0) { App.Alert("请选择至少一条数据"); return; }
+            var ids = Core.GetSelectId();
+            if (ids.length == 0) { Core.Alert("请选择至少一条数据"); return; }
 
-            App.Confirm("是否确定删除数据", function (result) {
+            Core.Confirm("是否确定删除数据", function (result) {
                 if (result) {
                     $.post(defualt_Path + "Delete", { "ids": ids }, function (data) {
                         if (data > 0) {
                             location.href = defualt_Path;
                         }
                         else {
-                            App.Alert("删除失败");
+                            Core.Alert("删除失败");
                         }
                     });
                 }
@@ -408,6 +408,8 @@
             var iframe = script.closest(".J_iframe");
             iframe.find("form[data-ajax-update='#" + ticket + "']").attr("data-ajax-update", "#" + _J_Frame_Prefix_ + iframe.data("id"));
             script.remove();
+            iframe.find("select[multiple]").chosen();
+            iframe.find(".btn-lookup").click(function () { Core.lookup($(this).data("url"), "Core.lookupDone"); })
         },
         goToUrl: function (url, frameId) {
             if (frameId == undefined) {
@@ -454,8 +456,46 @@
             for (i in _Select_ID_) ids.push(_Select_ID_[i]);
             return ids;
         },
+        modal: function (url, w, h) {
+            var modalId = "modal-" + Math.floor(Math.random() * 10000);
+            var param = "";
+            if (w != undefined && parseInt(w) != NaN) { param += " width:" + parseInt(w) + "px;"; }
+            if (h != undefined && parseInt(h) != NaN) { param += " height:" + parseInt(h) + "px;"; }
+            var $modalDiv = $('<div id="' + modalId + '" class="modal container fade" tabindex="-1" style="background:#fff; ' + param + '"></div>').appendTo('body');
+            if (url.indexOf("?") > 0) { url += "&"; }
+            else { url += "?"; }
+            url += "_target=" + modalId;
 
+            //var parentModel = App.getModel();
 
+            $modalDiv.load(url, '', function () {
+                $modalDiv.modal().on('hidden.bs.modal', function () {
+                    $modalDiv.remove();
+                    //App.releaseModel(parentModel);
+                });
+            });
+        },
+        lookup: function (url, callbackName) {
+            url += "&callback=" + callbackName;
+            this.modal(url);
+        },
+        lookupDone: function (lookupId, multi) {
+            var ids = Core.getSelected();
+            var names = Core.getSelectedNames();
+            if (ids.length == 0) return Core.alert("请选择数据！");
+            if (multi == 0) {
+                var id = ids[0];
+                var name = names[0];
+                $('#' + lookupId).val(id);
+                $('#' + lookupId + "Name").val(name);
+            } else {
+                $('input[Name="' + lookupId + '"]').remove();
+                for (var i = 0; i < ids.length; i++) {
+                    $('<input type="hidden" id="' + lookupId + '" name="' + lookupId + '" value="' + ids[i] + '" />').insertBefore($('#' + lookupId + "Name"));
+                }
+                $('#' + lookupId + "Name").val(names.join(","));
+            }
+        },
     }
 
 }();

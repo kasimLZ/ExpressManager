@@ -1,0 +1,47 @@
+﻿@using Common.Attributes;
+@using System.Reflection;
+@{
+
+    var lookupId = Html.NameForModel().ToString().Replace(".", "_");
+    var fullModel = ViewData["FullModel"];
+    var lookupAttr = fullModel.GetType().GetProperty(Html.NameForModel().ToString()).GetCustomAttributes().First(a => a is LookupAttribute) as LookupAttribute;
+    var values = ViewData.ContainsKey("AdditionalValues") ? ViewData["AdditionalValues"] as Dictionary<string, object> : ViewData.ModelMetadata.AdditionalValues;
+
+    var LookUpUrl = !string.IsNullOrEmpty(lookupAttr.Url) ? lookupAttr.Url :
+        !string.IsNullOrEmpty(lookupAttr.RouteName) ? Url.RouteUrl(lookupAttr.RouteName, lookupAttr.RouteValues) :
+        Url.RouteUrl(lookupAttr.RouteValues);
+    var showName = (!lookupAttr.Multi && fullModel != null && !string.IsNullOrEmpty(lookupAttr.ShowName))
+        ? ObjectUtils.GetPropValue(fullModel, lookupAttr.ShowName)
+        : (ViewData.ContainsKey(lookupId + "Name") ? ViewData[lookupId + "Name"] : Request[lookupId + "Name"]);
+    LookUpUrl += "?Select=1&hids=" + lookupId + "&Multi=" + lookupAttr.Multi;
+    if (!string.IsNullOrEmpty(lookupAttr.Condition))
+    {
+        LookUpUrl += "&" + lookupAttr.Condition;
+    }
+
+}
+<div class="input-group">
+    @if (lookupAttr.Multi)
+    {
+        var itemIds = Html.ValueForModel().ToString();
+        if (string.IsNullOrEmpty(itemIds))
+        {
+            @Html.HiddenFor(a => a);
+        }
+        else
+        {
+            foreach (var itemId in itemIds.Split(','))
+            {
+                <input type="hidden" name="@(lookupId)" value="@(itemId)" />
+            }
+            showName = ViewData[lookupId + "Name"];
+        }
+    }
+    else
+    {
+        @Html.HiddenFor(a => a);
+    }
+    <input id="@(lookupId)Name" type="text" class="form-control input-lookup" readonly="readonly" value="@showName"><span class="input-group-btn">
+        <button type="button" class="btn btn-success btn-lookup" data-url="@LookUpUrl">Choosen</button>
+    </span>
+</div>

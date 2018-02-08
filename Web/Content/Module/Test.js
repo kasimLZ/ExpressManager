@@ -7,3 +7,5 @@
         set: function (value) { val = value;  }
     };
 }()
+
+Temp = 1123;

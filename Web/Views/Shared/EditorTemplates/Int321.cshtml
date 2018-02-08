@@ -1,6 +1,0 @@
-﻿@model int?
-<select id="@Html.NameForModel()" name="@Html.NameForModel()" class="form-control">
-    <option>请选择</option>
-    <option value="true" @Html.Raw(Model.Value == 1 ? "selected=\"selected\"" : "")>是</option>
-    <option value="false" @Html.Raw(Model.Value != 1 ? "selected=\"selected\"" : "")>否</option>
-</select>

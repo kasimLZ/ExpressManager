@@ -36,6 +36,7 @@ namespace DataBase.Base.Model
         /// <summary>
         /// 按钮图标
         /// </summary>
+        [DataType("Ico")]
         [MaxLength(50)]
         public string ButtonIcon { get; set; }
 

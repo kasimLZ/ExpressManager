@@ -178,6 +178,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\CSS\chosen\chosen-sprite%402x.png" />
+    <Content Include="Content\CSS\chosen\chosen-sprite.png" />
+    <Content Include="Content\CSS\chosen\chosen.css" />
+    <Content Include="Content\Images\a4.jpg" />
+    <Content Include="Content\Scripts\chosen\chosen.jquery.js" />
     <Content Include="Content\CSS\animate.css" />
     <Content Include="Content\CSS\bootstrap.css" />
     <Content Include="Content\CSS\bootstrap.min.css" />
@@ -271,14 +276,18 @@
     <Content Include="Views\Shared\EditorTemplates\Boolean.cshtml" />
     <Content Include="Views\Shared\EditorTemplates\DateTime.cshtml" />
     <Content Include="Views\Shared\EditorTemplates\Html.cshtml" />
-    <Content Include="Views\Shared\EditorTemplates\Int321.cshtml" />
-    <Content Include="Views\Shared\EditorTemplates\PopButton.cshtml" />
     <Content Include="Views\Shared\EditorTemplates\SelectList.cshtml" />
     <Content Include="Views\Shared\EditorTemplates\String.cshtml" />
     <Content Include="Views\Shared\Index.cshtml" />
     <Content Include="Views\Shared\Search_Input.cshtml" />
     <Content Include="Views\Shared\Search_Input_Button.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\Ico.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\Enum.cshtml" />
+    <Content Include="Views\Shared\Detail.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\Lookup.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\MultiSelectList.cshtml" />
+    <Content Include="Views\Shared\Lookup.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

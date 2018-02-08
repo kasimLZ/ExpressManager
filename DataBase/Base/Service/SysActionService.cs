@@ -5,6 +5,8 @@ using DataBase.Base.Model;
 using DataBase.Base.Service.Infrastructure;
 using System.Linq;
 using Common;
+using System.Web.Mvc;
+using System.Collections;
 
 namespace DataBase.Base.Service
 {
@@ -14,6 +16,10 @@ namespace DataBase.Base.Service
             : base(databaseFactory, userInfo)
         {
         }
-        
+
+        public MultiSelectList SelectA(IEnumerable list = null)
+        {
+            return new MultiSelectList(GetAll(), "Id", "ActionDisplayName", list);
+        }
     }
 }

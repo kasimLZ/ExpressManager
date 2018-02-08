@@ -12,14 +12,14 @@ namespace Web.Controllers
 {
     public class SmartController<TModel> : BaseController where TModel: DbSetBase, new()
     {
-        private readonly IRepositoryBase<TModel> _iRepositoryService = DependencyResolver.Current.GetService<IRepositoryBase<TModel>>();
+        protected readonly IRepositoryBase<TModel> _iRepositoryService = DependencyResolver.Current.GetService<IRepositoryBase<TModel>>();
         protected readonly IUnitOfWork _iUnitOfWork = DependencyResolver.Current.GetService<IUnitOfWork>();
         protected readonly ICurrentUser _iCurrentUser = DependencyResolver.Current.GetService<ICurrentUser>();
 
         protected string _jsModel = string.Empty;
         protected List<string> _searchFields = new List<string>();
 
-        public ActionResult Index(int pagedIndex = 1)
+        public virtual ActionResult Index(int pagedIndex = 1)
         {
             ViewData["_JsModel"] = _jsModel;
             ViewData["_SearchFields"] = _searchFields;
@@ -29,7 +29,12 @@ namespace Web.Controllers
             return View(model);
         }
 
-        public ActionResult Edit(long? Id)
+        public virtual ActionResult Detail(long Id)
+        {
+            return View(_iRepositoryService.GetById(Id));
+        }
+
+        public virtual ActionResult Edit(long? Id)
         {
             TModel model = new TModel();
             if (Id.HasValue) {
@@ -39,7 +44,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(long? Id, TModel model)
+        public virtual ActionResult Edit(long? Id, TModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -51,7 +56,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult Delete(long [] ids)
+        public virtual JsonResult Delete(long [] ids)
         {
             bool State = true ;
             long Count = 0; 

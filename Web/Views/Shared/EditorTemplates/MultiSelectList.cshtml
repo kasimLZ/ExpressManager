@@ -1,0 +1,7 @@
+﻿@model MultiSelectList
+<select name="@Html.NameForModel()" id="@Html.NameForModel()" multiple class="form-control" data-placeholder=" ">
+    @foreach (var item in Model)
+    {
+        <option value="@item.Value" @(item.Selected ? "selected" : "")>@item.Text</option>
+    }
+</select>

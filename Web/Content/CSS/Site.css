@@ -1,5 +1,11 @@
-﻿
+﻿.margin-right-5 {
+    margin-right: 5px;
+}
 
+.head-img {
+    max-height:50px;
+    max-width:50px;
+}
 .jqstooltip {
     position: absolute;
     left: 0px;
@@ -125,4 +131,29 @@ nav.page-tabs {
 }
 .roll-right.J_tabRight {
     right: 80px
+}
+.icon-select {
+    font-size: 15px;
+    position: fixed;
+    display: none;
+    z-index: 100;
+    background-color: white;
+    border: 1px #2f4050 thin;
+}
+    .icon-select ul {
+        padding:0;
+    }
+        .icon-select li {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        list-style: none;
+        height: 17px;
+        width: 17px;
+        text-align: center;
+        display: inline-block
+    }
+
+.input-lookup {
+    background-color: #fff !important;
 }
