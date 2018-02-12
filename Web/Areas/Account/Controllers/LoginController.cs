@@ -23,7 +23,7 @@ namespace Web.Areas.Account.Controllers
         // GET: Account/Login
         public ActionResult Index()
         {
-            return View(new LoginModel());
+            return View(new LoginModel()); 
         }
 
         [HttpPost]
