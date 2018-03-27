@@ -46,7 +46,7 @@ namespace DataBase.Base.Model
         public string SystemId { get; set; }
 
         [ForeignKey("SysArea")]
-        [Lookup(RouteString = "Area=SysManager,Controller=SysArea,Action=Lookup", ShowName = "SysArea.AreaDisplayName")]
+        [Lookup(LinkConfig = "Route:Area=SysManager,Controller=SysArea,Action=Lookup", ShowField = "AreaDisplayName")]
         public long? SysAreaId { get; set; }
 
         [ScaffoldColumn(false)]

@@ -169,6 +169,7 @@
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SmartController.cs" />
+    <Compile Include="Controllers\SmartLookupController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -287,7 +288,8 @@
     <Content Include="Views\Shared\Detail.cshtml" />
     <Content Include="Views\Shared\EditorTemplates\Lookup.cshtml" />
     <Content Include="Views\Shared\EditorTemplates\MultiSelectList.cshtml" />
-    <Content Include="Views\Shared\Lookup.cshtml" />
+    <Content Include="Views\Shared\Lookup_Base.cshtml" />
+    <Content Include="Views\Shared\Lookup_Simple.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -297,6 +299,7 @@
     <Folder Include="Areas\SysManager\Views\Shared\" />
     <Folder Include="Models\" />
     <Folder Include="Views\Base\" />
+    <Folder Include="Views\SmartLookup\" />
     <Folder Include="Views\Smart\" />
   </ItemGroup>
   <ItemGroup>

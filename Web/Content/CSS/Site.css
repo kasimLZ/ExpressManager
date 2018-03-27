@@ -157,3 +157,9 @@ nav.page-tabs {
 .input-lookup {
     background-color: #fff !important;
 }
+
+.modal-wapper {
+    display: table;
+    height: 100%;
+    margin: 0px auto;
+}

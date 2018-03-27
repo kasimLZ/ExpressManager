@@ -1,0 +1,30 @@
+﻿@using System.Reflection
+@model System.Collections.IEnumerable
+@{
+    var primaryKey = Model.GetElementType().IdentifierPropertyName();
+
+    var _hideFields = (ViewData["_HideFields"] as string[]);
+    if (_hideFields == null) { _hideFields = new string[0] { }; }
+    var _showFields = (ViewData["_ShowFields"] as string[]);
+    if (_showFields == null) { _showFields = new string[0] { }; }
+
+    var field_infos = Model.VisibleProperties(_hideFields, _showFields);
+}
+<table class="table table-bordered">
+    @foreach (var item in Model)
+    {
+        ViewData["DataItem"] = item;
+        var primaryValue = item.GetType().GetProperty(primaryKey).GetValue(item);
+        <tr>
+            <td>
+                <input type="checkbox" value="@primaryValue" />
+            </td>
+            @foreach (var info in field_infos)
+            {
+                <td>
+                    @Html.Display("DataItem." + info.Name)
+                </td>
+            }
+        </tr>
+    }
+</table>

@@ -9,11 +9,7 @@ using Web.Controllers;
 
 namespace Web.Areas.SysManager.Controllers
 {
-    public class SysAreaController : SmartController<SysArea>
+    public class SysAreaController : SmartLookupController<SysArea>
     {
-        public ActionResult Lookup() {
-
-            return View();
-        }
     }
 }

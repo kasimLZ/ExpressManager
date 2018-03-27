@@ -4,24 +4,54 @@
 
     var lookupId = Html.NameForModel().ToString().Replace(".", "_");
     var fullModel = ViewData["FullModel"];
-    var lookupAttr = fullModel.GetType().GetProperty(Html.NameForModel().ToString()).GetCustomAttributes().First(a => a is LookupAttribute) as LookupAttribute;
-    var values = ViewData.ContainsKey("AdditionalValues") ? ViewData["AdditionalValues"] as Dictionary<string, object> : ViewData.ModelMetadata.AdditionalValues;
+    var lookup_set = fullModel.GetType().GetProperty(Html.NameForModel().ToString()).GetCustomAttributes().First(a => a is LookupAttribute) as LookupAttribute;
 
-    var LookUpUrl = !string.IsNullOrEmpty(lookupAttr.Url) ? lookupAttr.Url :
-        !string.IsNullOrEmpty(lookupAttr.RouteName) ? Url.RouteUrl(lookupAttr.RouteName, lookupAttr.RouteValues) :
-        Url.RouteUrl(lookupAttr.RouteValues);
-    var showName = (!lookupAttr.Multi && fullModel != null && !string.IsNullOrEmpty(lookupAttr.ShowName))
-        ? ObjectUtils.GetPropValue(fullModel, lookupAttr.ShowName)
-        : (ViewData.ContainsKey(lookupId + "Name") ? ViewData[lookupId + "Name"] : Request[lookupId + "Name"]);
-    LookUpUrl += "?Select=1&hids=" + lookupId + "&Multi=" + lookupAttr.Multi;
-    if (!string.IsNullOrEmpty(lookupAttr.Condition))
+    string LookUpUrl = string.Empty;
+    if (!string.IsNullOrEmpty(lookup_set.LinkConfig))
     {
-        LookUpUrl += "&" + lookupAttr.Condition;
+        var temp = lookup_set.LinkConfig.ToLower().Split(':');
+        if (temp.Length > 1)
+        {
+            switch (temp[0])
+            {
+                case "url": LookUpUrl = lookup_set.LinkConfig.Substring(4); break;
+                case "route":
+                    var dict = new RouteValueDictionary();
+                    string routeName = string.Empty;
+                    foreach (var item in lookup_set.LinkConfig.Substring(6).Split(','))
+                    {
+                        var pair = item.Split('=');
+                        if (pair.Length >= 2)
+                        {
+                            string key = pair[0], value = item.Substring(pair[0].Length);
+                            if (key.ToLower().Equals("routename"))
+                            {
+                                routeName = value;
+                            }
+                            else
+                            {
+                                dict.Add(pair[0], item.Substring(pair[0].Length));
+                            }
+                        }
+                    }
+                    LookUpUrl = Url.RouteUrl(string.IsNullOrEmpty(routeName) ? "default": routeName, dict);
+                    break;
+            }
+        }
+    }
+    //var showName = (!lookup_set.Multi && fullModel != null && !string.IsNullOrEmpty(lookupAttr.ShowName))
+    //    ? ObjectUtils.GetPropValue(fullModel, lookupAttr.ShowName)
+    //    : (ViewData.ContainsKey(lookupId + "Name") ? ViewData[lookupId + "Name"] : Request[lookupId + "Name"]);
+    LookUpUrl += "?Hids=" + lookupId + "&Multi=" + lookup_set.Multi + "&Style=" + lookup_set.LookupType;
+
+    if (!string.IsNullOrEmpty(lookup_set.Condition))
+    {
+        LookUpUrl += "&" + lookup_set.Condition;
     }
 
 }
 <div class="input-group">
-    @if (lookupAttr.Multi)
+    @if (lookup_set.Multi)
     {
         var itemIds = Html.ValueForModel().ToString();
         if (string.IsNullOrEmpty(itemIds))
@@ -34,14 +64,14 @@
             {
                 <input type="hidden" name="@(lookupId)" value="@(itemId)" />
             }
-            showName = ViewData[lookupId + "Name"];
+            //showName = ViewData[lookupId + "Name"];
         }
     }
     else
     {
         @Html.HiddenFor(a => a);
     }
-    <input id="@(lookupId)Name" type="text" class="form-control input-lookup" readonly="readonly" value="@showName"><span class="input-group-btn">
+    <input id="@(lookupId)Name" type="text" class="form-control input-lookup" readonly="readonly" value="showName"><span class="input-group-btn">
         <button type="button" class="btn btn-success btn-lookup" data-url="@LookUpUrl">Choosen</button>
     </span>
 </div>

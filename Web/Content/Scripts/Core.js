@@ -409,7 +409,9 @@
             iframe.find("form[data-ajax-update='#" + ticket + "']").attr("data-ajax-update", "#" + _J_Frame_Prefix_ + iframe.data("id"));
             script.remove();
             iframe.find("select[multiple]").chosen();
-            iframe.find(".btn-lookup").click(function () { Core.lookup($(this).data("url"), "Core.lookupDone"); })
+            iframe.find(".btn-lookup[data-url]").click(function () {
+                Core.lookup($(this).data("url"), $(this).data("width"), $(this).data("height"), "Core.lookupDone");
+            })
         },
         goToUrl: function (url, frameId) {
             if (frameId == undefined) {
@@ -461,7 +463,7 @@
             var param = "";
             if (w != undefined && parseInt(w) != NaN) { param += " width:" + parseInt(w) + "px;"; }
             if (h != undefined && parseInt(h) != NaN) { param += " height:" + parseInt(h) + "px;"; }
-            var $modalDiv = $('<div id="' + modalId + '" class="modal container fade" tabindex="-1" style="background:#fff; ' + param + '"></div>').appendTo('body');
+            var $modalDiv = $('<div id="' + modalId + '" class="modal container fade" tabindex="-1" style="' + param + '"></div>').appendTo('body');
             if (url.indexOf("?") > 0) { url += "&"; }
             else { url += "?"; }
             url += "_target=" + modalId;
@@ -469,15 +471,16 @@
             //var parentModel = App.getModel();
 
             $modalDiv.load(url, '', function () {
+
                 $modalDiv.modal().on('hidden.bs.modal', function () {
                     $modalDiv.remove();
                     //App.releaseModel(parentModel);
                 });
             });
         },
-        lookup: function (url, callbackName) {
+        lookup: function (url, callbackName, width, height) {
             url += "&callback=" + callbackName;
-            this.modal(url);
+            this.modal(url, width, height);
         },
         lookupDone: function (lookupId, multi) {
             var ids = Core.getSelected();

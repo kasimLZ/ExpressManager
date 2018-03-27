@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="Attributes\LookupAttribute.cs" />
+    <Compile Include="Attributes\RemarkAttribute.cs" />
     <Compile Include="Attributes\SearchAttribute.cs" />
     <Compile Include="Attributes\SelectListAttribute.cs" />
     <Compile Include="ICurrentUser.cs" />
