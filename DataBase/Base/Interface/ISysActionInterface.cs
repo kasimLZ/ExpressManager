@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace DataBase.Base.Interface
 {
-    public interface SysActionInterface : IRepositoryBase<SysAction>
+    public interface ISysActionInterface : IRepositoryBase<SysAction>
     {
         MultiSelectList SelectA(IEnumerable list = null);
     }

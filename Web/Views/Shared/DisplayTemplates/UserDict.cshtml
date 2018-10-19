@@ -1,0 +1,11 @@
+﻿@using Common.Attributes;
+@using System.Reflection;
+@model string
+@{
+	if (Model == null) { return; }
+	var metaData = Html.GetPropMetadata();
+	var UD = metaData.ContainerType.GetProperty(metaData.PropertyName).GetCustomAttribute<UserDictAttribute>();
+	TempData["UserDict_PropertyName"] = metaData.PropertyName;
+	ViewData["UserDictModel"] = Model;
+}
+@Html.Partial("~/Views/Shared/DisplayTemplates/" + (UD.Multi ? "MultiSelectList" : "SelectList") + ".cshtml", Model)

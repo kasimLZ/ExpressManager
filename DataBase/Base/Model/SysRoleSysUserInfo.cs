@@ -16,7 +16,4 @@ namespace DataBase.Base.Model
         [ForeignKey("SysUserInfo")]
         public long SysUserId { get; set; }
     }
-
-
-
 }

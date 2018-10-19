@@ -1,0 +1,32 @@
+﻿@using System.Collections;
+@{
+	IEnumerable<object> SelectItems = null;
+	if (Model is string)
+	{
+		SelectItems = (Model as string).Split(',');
+	}
+	else if (Model is IEnumerable)
+	{
+		SelectItems = (Model as IEnumerable).ConvertIEnumerable<string>();
+	}
+	else
+	{
+		goto UnKnown;
+	}
+
+	var meta = Html.GetPropMetadata();
+	string porpName = meta.PropertyName ?? TempData["UserDict_PropertyName"].ToString();
+	IEnumerable<SelectListItem> select = ViewData[porpName] as IEnumerable<SelectListItem>;
+	if (select == null) { goto UnKnown; }
+
+}
+@foreach (var item in select.Where(a => SelectItems.Contains(a.Value)))
+{
+	<span class="label label-info">@item.Text</span>
+}
+@{
+	goto Finish;
+	UnKnown:;
+	@Model
+	Finish:; 
+}

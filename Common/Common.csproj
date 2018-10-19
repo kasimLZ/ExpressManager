@@ -64,10 +64,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="Attributes\DataForAttribute.cs" />
+    <Compile Include="Attributes\IEnumerableField.cs" />
+    <Compile Include="Attributes\ITranslatable.cs" />
     <Compile Include="Attributes\LookupAttribute.cs" />
+    <Compile Include="Attributes\OrderAttribute.cs" />
     <Compile Include="Attributes\RemarkAttribute.cs" />
     <Compile Include="Attributes\SearchAttribute.cs" />
     <Compile Include="Attributes\SelectListAttribute.cs" />
+    <Compile Include="Attributes\ShowNameAttribute.cs" />
+    <Compile Include="Attributes\UserDictAttribute.cs" />
+    <Compile Include="Attributes\Validation\RequiredLengthAttribute.cs" />
+    <Compile Include="ConvertBase64.cs" />
+    <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="EnumExtend.cs" />
     <Compile Include="ICurrentUser.cs" />
     <Compile Include="Linq\ClassFactory.cs" />
     <Compile Include="Linq\DynamicClass.cs" />

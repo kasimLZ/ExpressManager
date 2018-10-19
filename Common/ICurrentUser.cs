@@ -4,9 +4,11 @@ namespace Common
 {
     public interface ICurrentUser
     {
-        int? Id { get; }
+        long? Id { get; }
 
         string Name { get; }
+
+        string HeadIcon { get; }
 
         NameValueCollection Cookie { get; }
     }

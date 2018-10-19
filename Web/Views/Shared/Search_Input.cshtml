@@ -3,74 +3,60 @@
 @using Common.Linq
 @using System.Collections
 @{
+	const int rowMax = 3;
 
-    IEnumerable<string> SearchField = ViewData["_SearchFields"] as IEnumerable<string>;
-    if (SearchField == null)
-    {
-        List<string> fields = new List<string>();
-        foreach (PropertyInfo info in Model.GetElementType().GetProperties())
-        {
-            if (info.GetCustomAttributes().Any(a => a is SearchAttribute)) { fields.Add(info.Name); }
-        }
-        SearchField = fields;
+	IEnumerable<string> SearchField = ViewData["_SearchFields"] as IEnumerable<string>;
+	if (SearchField == null)
+	{
+		List<string> fields = new List<string>();
+		foreach (PropertyInfo info in Model.GetElementType().GetProperties())
+		{
+			if (info.GetCustomAttributes().Any(a => a is SearchAttribute)) { fields.Add(info.Name); }
+		}
+		SearchField = fields;
 
-    }
+	}
 
+	if (SearchField.Count().Equals(0)) { return; }
 
-    if (SearchField.Count().Equals(0)) { return; }
-
-    int SearchBlockCount = 0;
-    var rowMax = 3;
-    bool ShowSubmit = false;
-
-    ViewData["Enable"] = new SelectList(new List<SelectListItem> { new SelectListItem { Text = "是",Value = "true" }, new SelectListItem { Text = "否",Value = "false" } }, "Value","Text", null);
+	int SearchBlockCount = 0;
+	bool ShowSubmit = false;
+	ViewData["Enable"] = new SelectList(new List<SelectListItem> { new SelectListItem { Text = "是", Value = "true" }, new SelectListItem { Text = "否", Value = "false" } }, "Value", "Text", null);
 
 
 }
+@using (Ajax.BeginForm(null, null, new AjaxOptions { UpdateTargetId = "MainBody", HttpMethod = "GET" }, new { @class = "form-horizontal" }))
+{
+	while (SearchBlockCount < SearchField.Count())
+	{
+		int i = SearchBlockCount;
+		int size = SearchBlockCount + rowMax;
+		<div class="row">
+			@for (; i < SearchField.Count() && i < size; i++)
+			{
+				var prop = ObjectUtils.GetModelProperty(ViewData.ModelMetadata, SearchField.ElementAt(i));
+				<div class="col-md-4">
+					<div class="form-group">
+						<label class="col-md-4 control-label" for="@prop.PropertyName">@(string.IsNullOrEmpty(prop.DisplayName) ? prop.PropertyName : prop.DisplayName ):</label>
+						<div class="col-md-8">
+							@Html.Editor(SearchField.ElementAt(i))
+						</div>
+					</div>
+				</div>
+				SearchBlockCount++;
+			}
 
-<div class="ibox float-e-margins">
-    <div class="ibox-title">
-        <h5>检索</h5>
-        <div class="ibox-tools">
-            <a class="collapse-link">
-                <i class="fa fa-chevron-up"></i>
-            </a>
-        </div>
-    </div>
-    <div class="ibox-content">
-        <form class="form-horizontal">
-            @while (SearchBlockCount < SearchField.Count())
-                {
-                    int i = SearchBlockCount;
-                    int size = SearchBlockCount + rowMax;
-                    <div class="row">
-                        @for (; i < SearchField.Count() && i < size; i++)
-                        {
-                            var prop = ObjectUtils.GetModelProperty(ViewData.ModelMetadata, SearchField.ElementAt(i));
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label" for="@prop.PropertyName">@prop.DisplayName:</label>
-                                    <div class="col-md-8">
-                                        @Html.Editor(SearchField.ElementAt(i))
-                                    </div>
-                                </div>
-                            </div>
-                            SearchBlockCount++;
-                        }
-
-                        @if (i < size)
-                        {
-                            ShowSubmit = true;
-                            @Html.Partial("Search_Input_Button")
-                        }
-                    </div>
-                }
-                @if (!ShowSubmit)
-                {
-                    <div class="row">
-                        @Html.Partial("Search_Input_Button")
-                    </div>
-                }
-        </form>
-    </div>
-</div>
+			@if (i < size)
+			{
+				ShowSubmit = true;
+				@Html.Partial("Search_Input_Button")
+			}
+		</div>
+	}
+	if (!ShowSubmit)
+	{
+		<div class="row">
+			@Html.Partial("Search_Input_Button")
+		</div>
+	}
+}

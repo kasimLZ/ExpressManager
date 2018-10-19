@@ -8,7 +8,7 @@ using Common;
 
 namespace DataBase.Base.Service
 {
-    public class SysControllerService : RepositoryBase<SysController>, SysControllerInterface
+    public class SysControllerService : RepositoryBase<SysController>, ISysControllerInterface
     {
         public SysControllerService(IDatabaseFactory databaseFactory, ICurrentUser userInfo) 
             : base(databaseFactory, userInfo)

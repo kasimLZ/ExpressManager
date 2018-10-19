@@ -1,11 +1,8 @@
-﻿@*<textarea class="form-control">
-
-    </textarea>*@
-
+﻿
 @model string
-@Html.TextAreaFor(a=>a)
 
-<script>
-    var u_@(Html.NameForModel()) = UE.getEditor('@Html.NameForModel()', { "allowDivTransToP": true, "wordCount": false });
-</script>
+@{
+    var attrs = new Dictionary<string, object> { { "style", "width:100%;height:200px" }, { "data-init-component", "html" } };
+}
+@Html.TextAreaFor(a => a, attrs)
 

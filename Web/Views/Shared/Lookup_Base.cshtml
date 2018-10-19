@@ -1,6 +1,8 @@
 ﻿@using System.Reflection
 @model System.Collections.IEnumerable
 @{
+    IPagedList PageListModel = Model as IPagedList;
+
     var primaryKey = Model.GetElementType().IdentifierPropertyName();
 
     var _hideFields = (ViewData["_HideFields"] as string[]);
@@ -9,22 +11,67 @@
     if (_showFields == null) { _showFields = new string[0] { }; }
 
     var field_infos = Model.VisibleProperties(_hideFields, _showFields);
-}
-<table class="table table-bordered">
-    @foreach (var item in Model)
+
+    #region 初始化自动分页参数
+    if (PageListModel != null)
     {
-        ViewData["DataItem"] = item;
-        var primaryValue = item.GetType().GetProperty(primaryKey).GetValue(item);
-        <tr>
-            <td>
-                <input type="checkbox" value="@primaryValue" />
-            </td>
-            @foreach (var info in field_infos)
-            {
-                <td>
-                    @Html.Display("DataItem." + info.Name)
-                </td>
-            }
-        </tr>
+        ViewData["_PageIndex"] = PageListModel.PageIndex;
+        ViewData["_PageSize"] = PageListModel.PageSize;
+        ViewData["_TotalCount"] = PageListModel.TotalCount;
     }
-</table>
+    #endregion
+
+    bool Multi = true;
+    bool.TryParse(Request.QueryString["Multi"], out Multi);
+
+    string Field = Request.QueryString["Hids"];
+    if (string.IsNullOrEmpty(Field)) { throw new HttpRequestValidationException(); }
+    
+}
+@Html.Partial("_Partial_Init_Script","LookupBase")
+<div class="lookup-body modal-content">
+    <div style="text-align:right;">
+        <a data-dismiss="modal" aria-hidden="true" style="font-size:16px; margin-right:15px; color:grey">&times;</a>
+    </div>
+
+    <div>
+        <table class="table table-bordered select-enable" data-showname="@Request.QueryString["NameField"]">
+            <thead>
+                <tr>
+                    <th>
+                        @if (Multi)
+                        {
+                            <input type="checkbox" class="selectAll" />
+                        }
+                    </th>
+                    @foreach (PropertyInfo title in field_infos)
+                    {
+                        if (!title.Name.Equals(primaryKey))
+                        {
+                            <th data-name="@title.Name">@title.GetLabel().ToSeparatedWords()</th>
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    ViewData["DataItem"] = item;
+                    var primaryValue = item.GetType().GetProperty(primaryKey).GetValue(item);
+                    <tr>
+                        <td><input type="@(Multi ? "checkbox" :"radio")" name="model-for-@Field" value="@primaryValue" /></td>
+                        @foreach (var info in field_infos)
+                        {
+                            <td>@Html.Display("DataItem." + info.Name)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @Html.Raw(Html.HashPager((int)ViewData["_PageIndex"], (int)ViewData["_PageSize"], (int)ViewData["_TotalCount"]))
+    <div class="text-center">
+        <a class="btn btn-success modal-check" onclick="@(Request.QueryString["callback"] ?? "Core.lookupDone")('@Field', @(Multi.ToString().ToLower()))"  data-dismiss="modal" aria-hidden="true">Check</a>
+        <a class="btn btn-warning" data-dismiss="modal" aria-hidden="true">Cancel</a>
+    </div>
+</div>

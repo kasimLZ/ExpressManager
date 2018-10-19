@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace DataBase.Base.Service
 {
-    public class SysActionService : RepositoryBase<SysAction>, SysActionInterface
+    public class SysActionService : RepositoryBase<SysAction>, ISysActionInterface
     {
         public SysActionService(IDatabaseFactory databaseFactory, ICurrentUser userInfo) 
             : base(databaseFactory, userInfo)

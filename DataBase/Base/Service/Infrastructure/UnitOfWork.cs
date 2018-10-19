@@ -28,5 +28,14 @@ namespace DataBase.Base.Service.Infrastructure
             return this._dataContext.CommitAsync();
         }
 
-    }
+		public void Implement(string QueryString, params object[] parameters)
+		{
+			_dataContext.Database.SqlQuery<dynamic>(QueryString, parameters).Count();
+		}
+
+		public IEnumerable<TModel> Implement<TModel>(string QueryString, params object[] parameters)
+		{
+			return _dataContext.Database.SqlQuery<TModel>(QueryString, parameters).ToList().AsEnumerable();
+		}
+	}
 }

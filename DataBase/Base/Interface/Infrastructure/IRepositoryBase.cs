@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataBase.Base.Model;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -7,7 +8,6 @@ namespace DataBase.Base.Infrastructure.Interface
 {
     public interface IRepositoryBase<T> where T : class
     {
-        // Methods
         void Add(T entity);
         int Commit();
         Task<int> CommitAsync();

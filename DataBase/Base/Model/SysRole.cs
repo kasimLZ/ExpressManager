@@ -14,8 +14,10 @@ namespace DataBase.Base.Model
         [MaxLength(50), Required(ErrorMessage = "角色名称是必填项")]
         public string RoleName { get; set; }
 
+        [ScaffoldColumn(false)]
         public virtual ICollection<SysRoleSysControllerSysAction> SysRoleSysControllerSysActions { get; set; }
 
+        [ScaffoldColumn(false)]
         public virtual ICollection<SysRoleSysUserInfo> SysRoleSysUsers { get; set; }
 
         [MaxLength(50), Required]

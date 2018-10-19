@@ -174,6 +174,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helper\CurrentUser.cs" />
+    <Compile Include="Helper\EntityExtensions.cs" />
+    <Compile Include="Helper\FormFormat.cs" />
+    <Compile Include="Helper\HandleExceptionFilter.cs" />
+    <Compile Include="Helper\ModelHelper.cs" />
+    <Compile Include="Helper\Uploader.cs" />
     <Compile Include="Helper\UserAuthorizeAttribute.cs" />
     <Compile Include="Helper\ViewHelperExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -290,6 +295,16 @@
     <Content Include="Views\Shared\EditorTemplates\MultiSelectList.cshtml" />
     <Content Include="Views\Shared\Lookup_Base.cshtml" />
     <Content Include="Views\Shared\Lookup_Simple.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\Enum.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\Html.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\Ico.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\Lookup.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\MultiSelectList.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\SelectList.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\UserDict.cshtml" />
+    <Content Include="Views\Shared\EditorTemplates\MultilineText.cshtml" />
+    <Content Include="Views\Shared\_Partial_Init_Script.cshtml" />
+    <Content Include="Views\Shared\_Partial_Submit_Button.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -334,7 +349,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>34403</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:34403/</IISUrl>
+          <IISUrl>http://localhost:34401/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

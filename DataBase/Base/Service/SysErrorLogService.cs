@@ -5,7 +5,7 @@ using DataBase.Base.Service.Infrastructure;
 
 namespace DataBase.Base.Service
 {
-    public class SysErrorLogService : RepositoryBase<SysErrorLog>, SysErrorLogInterface
+    public class SysErrorLogService : RepositoryBase<SysErrorLog>, ISysErrorLogInterface
     {
         public SysErrorLogService(IDatabaseFactory databaseFactory, ICurrentUser userInfo) 
             : base(databaseFactory, userInfo)

@@ -1,1 +1,8 @@
-﻿<input type="text" id="@Html.NameForModel()" name="@Html.NameForModel()" value="@Html.ValueForModel()" class="form-control layer-date" onclick="laydate({ istime: true, format: 'YYYY-MM-DD' })"/>
+﻿@model DateTime?
+@{
+	var metaData = Html.GetPropMetadata();
+}
+<div class="input-group date" data-init-component="datetime" data-format="@metaData.DisplayFormatString">
+    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+	<input type="text" class="form-control" name="@Html.NameForModel()" value="@(Model.HasValue? string.Format(metaData.DisplayFormatString??"{0}",Model.Value) :null)">
+</div>

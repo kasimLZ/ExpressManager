@@ -1,43 +1,51 @@
-﻿@model System.Collections.IEnumerable
+﻿@using System.Collections
+@model IEnumerable
 
 @{
-    string primaryKey = Model.GetElementType().IdentifierPropertyName();
+
+	Type mt = Model.GetElementType();
+	if (mt == null)
+	{
+		throw new Exception("No clear model definition was found");
+	}
+	var primaryKey = mt.GetProperty(Request["KeyField"] ?? Model.GetElementType().IdentifierPropertyName());
+	var showName = mt.GetProperty(Request["NameField"] ?? Model.GetElementType().IdentifierPropertyName());
+	int count = 0;
 }
-<div class="modal-dialog">
-    <div class="input-group m-b">
-        <input type="text" id="SearchName" name="SearchName" class="form-control" style="width:300px;" placeholder="">
-        <button type="button" class="btn btn-primary" onclick="SearchName()">搜索</button>
-    </div>
-    <table cellpadding="0" align="center" class="listshow" border="0" cellspacing="0">
-        <tbody>
-            <tr>
-                <td class="black" align="center">
-                    <select multiple="multiple" style="width:350px;height:410px;">
-                        @foreach (var item in Model)
-                        {
-                            ViewData["item"] = item;
-                            <option>@Html.Display("item." + primaryKey)</option>
-                        }
-                    </select>
-                </td>
-                <td width="2%" align="center">
-                    <input type="button" class="btn btn-info" id="add" value="添加>>">
-                    <input type="button" class="btn btn-white" id="delete" value="<<删除">
-                </td>
-                <td class="black" align="center">
-                    <select id="select_list" multiple="multiple" style="width:350px;height:410px;"></select>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <button type="button" class="btn btn-white" data-dismiss="modal" id="close" onclick="Close()">关闭</button>
-    <button type="submit" class="btn btn-success btn-sm" onclick="Save()"><i class="fa fa-save"></i>保存</button>
+@Html.Partial("_Partial_Init_Script", "LookupSimple")
+<div class="modal-dialog form-horizontal" style="background:#fff; padding:10px">
+	<div class="form-group">
+		<div class="col-sm-8">
+			<div class="input-group lookup-search">
+				<input type="text" class="form-control ls-text"> <span class="input-group-btn">
+					<button type="button" class="btn btn-success ls-search">搜索</button>
+					<button type="button" class="btn btn-warning ls-clear">清空</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<table cellpadding="0" align="center" border="0" cellspacing="0">
+		<tbody>
+			<tr>
+				<td class="black" align="center">
+					<select class="form-control select-container" name="left" multiple="multiple" style="width:275px;height:410px; overflow:auto">
+						@foreach (var item in Model)
+						{
+							<option sort="@(count++)" value="@(primaryKey.GetValue(item))">@Html.Raw(showName.GetValue(item).ToString())</option>
+						}
+					</select>
+				</td>
+				<td style="width:30px">
+					<select style="display:none" class="hidden-container"></select>
+				</td>
+				<td class="black" align="center">
+					<select class="form-control select-container" name="right" multiple="multiple" style="width:275px;height:410px; overflow:auto"></select>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div style="text-align:center; margin-top:10px;">
+		<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+		<button type="submit" class="btn btn-success btn-save" data-dismiss="modal"><i class="fa fa-save"></i>保存</button>
+	</div>
 </div>
-
-<script>
-    $(function () {
-        console.log("@Request["_target"]")
-    })
-    
-</script>

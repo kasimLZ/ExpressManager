@@ -1,0 +1,70 @@
+﻿@model string
+@{
+	Layout = null;
+	string _jsModel = (ViewData["_JsModel"] ?? ViewContext.RouteData.Values["controller"]) as string;
+	string _jsFile = ViewData["_JsFile"] as string ?? $"/Content/Module/{_jsModel}.js";
+	var Exist = File.Exists(Server.MapPath("~" + _jsFile));
+	var hasModel = ViewData["_JsModel"] == null;
+	var loadFunciton = hasModel ? "loadScript" : "loadFileScript";
+	var FirstParam = Html.Raw(hasModel ? "" : "\"" + _jsFile + "\", ");
+}
+@switch (Model)
+{
+	case "Index":
+		if (Exist)
+		{
+			<script temp-script>
+                Core.@(loadFunciton)(@(FirstParam)"@_jsModel", function () {
+                    Core.initCheck();
+                    if ($.isFunction(@(_jsModel).InitIndex)) @(_jsModel).InitIndex();
+                });
+			</script>
+		}
+		else
+		{
+			<script temp-script>
+				Core.initCheck();
+			</script>
+		}
+		break;
+	case "Edit":
+		if (Exist)
+		{
+			<script temp-script>
+                Core.@(loadFunciton)(@(FirstParam)"@_jsModel", function () {
+                    Core.initEditComponents();
+                    if ($.isFunction(@(_jsModel).InitEdit)) @(_jsModel).InitEdit();
+                });
+			</script>
+		}
+		else
+		{
+			<script temp-script>
+				Core.initEditComponents();
+			</script>
+		}
+		break;
+	case "LookupBase":
+		if (Exist)
+		{
+			<script temp-script>
+                Core.@(loadFunciton)(@(FirstParam)"@_jsModel", function () {
+                    Core.initCheck("@Html.RouteScope()","@Request["Hids"]");
+                    if ($.isFunction(@(_jsModel).InitLookupBase)) @(_jsModel).InitLookupBase();
+                });
+			</script>
+		}
+		else
+		{
+			<script temp-script>
+                Core.initCheck("@Html.RouteScope()");
+			</script>
+		}
+		break;
+	case "LookupSimple":
+		
+			<script temp-script>
+				Core.initSimpleCheck("@Request["_target"]", "@Request["Hids"]", @Request["Multi"].ToLower());
+			</script>
+		break;
+}

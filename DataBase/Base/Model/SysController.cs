@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DataBase.Base.Interface;
+using System.Linq;
 
 namespace DataBase.Base.Model
 {
+    [Order(Field = "SystemId", Order = "ASC")]
     public class SysController : DbSetBase
     {
         // Methods
@@ -22,7 +24,7 @@ namespace DataBase.Base.Model
         [MaxLength(50)]
         public string ActionName { get; set; }
 
-        [MaxLength(50), Required]
+        [MaxLength(50), Required, ShowName]
         public string ControllerDisplayName { get; set; }
 
         [MaxLength(50)]
@@ -37,16 +39,17 @@ namespace DataBase.Base.Model
         public string Parameter { get; set; }
 
         [Display(Name = "Action")]
-        [SelectList(typeof(SysActionInterface), "SelectA",true)]
+        [SelectList(typeof(ISysActionInterface), "SelectA", true)]
+        [DataFor(DataScoure = "SysControllerSysActions",Value = "SysActionId", Mode = UpdateMode.Replace)]
         public List<long> SysActionsId { get; set; }
-
+        
         public virtual ICollection<SysControllerSysAction> SysControllerSysActions { get; set; }
 
         [MaxLength(50), Required]
         public string SystemId { get; set; }
 
         [ForeignKey("SysArea")]
-        [Lookup(LinkConfig = "Route:Area=SysManager,Controller=SysArea,Action=Lookup", ShowField = "AreaDisplayName")]
+        [Lookup(LookupType.Base, LookupLink.Route, "Area=SysManager,Controller=SysArea,Action=Lookup", "AreaDisplayName")]
         public long? SysAreaId { get; set; }
 
         [ScaffoldColumn(false)]

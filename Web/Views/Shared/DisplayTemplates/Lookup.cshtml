@@ -1,0 +1,98 @@
+﻿@using Common.Attributes;
+@using System.Reflection;
+@using System.Collections;
+@using Web.Helper;
+@using System.ComponentModel.DataAnnotations.Schema
+
+@{
+    var lookupId = Html.NameForModel().ToString().Replace(".", "_");
+    var fullModel = ViewData["DataList"];
+    var propInfo = fullModel.GetType().GetProperty(Html.NameForModel().ToString().Replace("DataList.", ""));
+    var lookup_set = propInfo.GetCustomAttribute<LookupAttribute>();
+
+    object showName = null;
+
+    if (lookup_set.Mode == TranslatMode.None)
+    {
+        propInfo.FillProptype(fullModel);
+        showName = propInfo.GetValue(fullModel);
+        goto ShowContent;
+    }
+
+
+    showName = (!lookup_set.Multi && fullModel != null && !string.IsNullOrEmpty(lookup_set.Value))
+    ? ObjectUtils.GetPropValue(fullModel, lookup_set.Value)
+    : (ViewData.ContainsKey(lookupId + "Name")
+        ? ViewData[lookupId + "Name"]
+        : Request[lookupId + "Name"]);
+
+    if (showName == null && (lookup_set.Mode & TranslatMode.Property) != 0)
+    {
+        propInfo.FillProptype(fullModel);
+        if (lookup_set.Multi)
+        {
+            var datafor = propInfo.GetCustomAttribute<DataForAttribute>();
+            if (datafor != null && !string.IsNullOrEmpty(datafor.DataScoure) && !string.IsNullOrEmpty(datafor.ShowName))
+            {
+                showName = fullModel.GetEnumerableValue(datafor.DataScoure, datafor.ShowName)?.ToList();
+            }
+        }
+        else
+        {
+            if (fullModel != null && !string.IsNullOrEmpty(lookup_set.Value))
+            {
+                var fk = propInfo.GetCustomAttribute<ForeignKeyAttribute>();
+                showName = ObjectUtils.GetPropValue(fullModel, fk == null ? lookup_set.Value : (fk.Name + "." + lookup_set.Value));
+            }
+            if (showName == null) { showName = Model; }
+        }
+    }
+
+
+    if (showName == null && (lookup_set.Mode & TranslatMode.Dict) != 0)
+    {
+        propInfo.FillProptype(fullModel);
+        var value = lookup_set.Multi ?(Model is string ? Model.ToString().Split(lookup_set.Split) : (Model as IEnumerable)?.ConvertIEnumerable<string>()) : Model;
+        if (value != null)
+        {
+            var dict = ViewData[propInfo.Name] as IDictionary<string, string>;
+            if (dict != null)
+            {
+                if (!(value is string) && value is IEnumerable)
+                {
+                    var names = new List<string>();
+                    foreach (var item in (value as IEnumerable))
+                    {
+                        names.Add(dict[item.ToString()]);
+                    }
+                    showName = names;
+                }
+                else
+                {
+                    showName = dict[value.ToString()];
+                }
+            }
+        }
+    }
+
+    if (showName == null && (lookup_set.Mode & TranslatMode.Proxy) != 0)
+    {
+        //propInfo.FillProptype(fullModel);
+
+    }
+
+
+}
+@{ShowContent:}
+@if (!(showName is string) && showName is IEnumerable)
+{
+	foreach (var item in (showName as IEnumerable))
+	{
+		<span class="label label-info">@item</span>
+	}
+}
+else
+{
+	<text>@showName</text>
+}
+

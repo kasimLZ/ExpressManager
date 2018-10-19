@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DataBase.Base.Interface
 {
-    public interface SysControllerInterface : IRepositoryBase<SysController>
+    public interface ISysControllerInterface : IRepositoryBase<SysController>
     {
         IEnumerable<SysController> GetBreadcrumbActions(string controller, string action);
     }

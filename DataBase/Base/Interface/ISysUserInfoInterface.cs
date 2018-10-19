@@ -3,9 +3,11 @@ using DataBase.Base.Model;
 
 namespace DataBase.Base.Interface
 {
-    public interface SysUserInfoInterface : IRepositoryBase<SysUserInfo>
+    public interface ISysUserInfoInterface : IRepositoryBase<SysUserInfo>
     {
 
         SysUserInfo GetUser(string UserName, string Password);
+
+		bool CheckRole(long UserId, string area, string controller, string action);
     }
 }

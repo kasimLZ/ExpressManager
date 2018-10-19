@@ -3,7 +3,7 @@ using DataBase.Base.Model;
 
 namespace DataBase.Base.Interface
 {
-    public interface SysRoleSysUserInfoInterface : IRepositoryBase<SysRoleSysUserInfo>
+    public interface ISysAreaInterface : IRepositoryBase<SysArea>
     {
     }
 }

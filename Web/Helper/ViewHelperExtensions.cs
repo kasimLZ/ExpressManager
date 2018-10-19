@@ -18,6 +18,8 @@ using Common.Linq;
 using DataBase.Base.Model;
 using DataBase.Base.Interface;
 using Common.Attributes;
+using DataBase.Base.Infrastructure.Interface;
+using Web.Helper;
 
 namespace Web.Helpers
 {
@@ -34,25 +36,68 @@ namespace Web.Helpers
             return meta.GetDisplayName();
         }
 
-        public static object StuffSelectViewData(this ModelMetadata prop, object select = null)
+		public static IEnumerable<SelectListItem> StuffSelectViewData(this ModelMetadata prop, object select = null)
+		{
+			return StuffSelectViewData(prop.ContainerType.GetProperty(prop.PropertyName), select);
+		}
+
+
+		public static IEnumerable<SelectListItem> StuffSelectViewData(this PropertyInfo prop, object select = null)
         {
-            var sa = prop.ContainerType.GetProperty(prop.PropertyName).GetCustomAttributes().FirstOrDefault(a => a is SelectListAttribute) as SelectListAttribute;
-            var service =DependencyResolver.Current.GetService(sa.ServiceType);
-            var ParamArray = new List<object>();
+            var sa = prop.GetCustomAttribute<SelectListAttribute>();
+			var service = DependencyResolver.Current.GetService(sa.ServiceType);
+            var ParamTyps = new List<Type>();
             if (select != null)
-                ParamArray.Add(select);
-            var mothed = sa.ServiceType.GetMethod(sa.FunctionName,BindingFlags.Public | BindingFlags.Instance, null, ParamArray.Select(a => a.GetType()).ToArray(), null);
+                ParamTyps.Add(select.GetType());
+            else
+                ParamTyps.Add(typeof(IEnumerable));
+            var mothed = sa.ServiceType.GetMethod(sa.FunctionOrPropertyName,BindingFlags.Public | BindingFlags.Instance, null, ParamTyps.ToArray(), null);
             if (mothed != null)
-                try { return mothed.Invoke(service, ParamArray.ToArray()); } catch { }
+                try { return mothed.Invoke(service, new object [] { select }) as IEnumerable<SelectListItem>; } catch { }
             return null;
         }
+		
+		public static IEnumerable<SelectListItem> StuffUserDictViewData(this ModelMetadata prop, object value = null)
+		{
+			return StuffUserDictViewData(prop.ContainerType.GetProperty(prop.PropertyName), value);
+		}
 
-        /// <summary>
-        /// Separated word by space
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static string ToSeparatedWords(this string value)
+		public static IEnumerable<SelectListItem> StuffUserDictViewData(this PropertyInfo prop, object value = null)
+		{
+			IUserDictInterface _IUserDictService = DependencyResolver.Current.GetService<IUserDictInterface>();
+			UserDictAttribute Info = prop.GetCustomAttribute<UserDictAttribute>();
+
+			if (!Info.Multi)
+			{
+				return _IUserDictService.SelectListByType(Info.DictType, value);
+			}
+			else
+			{
+				IEnumerable select;
+				if (value is string)
+				{
+					select = value.ToString().Split(Info.Split);
+				}
+				else
+				{
+					select = value as IEnumerable;
+				}
+
+				return _IUserDictService.SMultiSelectListByType(Info.DictType, select);
+			}
+		}
+
+		public static bool IsRequiredField(this ModelMetadata prop)
+		{
+			return (prop.IsRequired && prop.ModelType != typeof(bool));
+		}
+
+		/// <summary>
+		/// Separated word by space
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static string ToSeparatedWords(this string value)
         {
             return Regex.Replace(value, "([A-Z][a-z])", " $1").Trim();
         }
@@ -67,22 +112,32 @@ namespace Web.Helpers
             return TypeExtensions.IdentifierPropertyName(model is Type ? model as Type : model.GetType());
         }
         
-        public static Type GetElementType(this IEnumerable Model)
+        public static Type GetElementType(this IEnumerable Model, int GenericArgument = 0)
         {
             var elementType = Model.GetType().GetElementType();
             if (elementType == null)
             {
-                elementType = Model.GetType().GetGenericArguments()[0];
+                elementType = Model.GetType().GetGenericArguments()[GenericArgument];
             }
             return elementType;
         }
 
-        /// <summary>
-        /// All visual fields in the model
-        /// </summary>
-        /// <param name="Model"></param>
-        /// <returns></returns>
-        public static PropertyInfo[] VisibleProperties(this IEnumerable Model, IEnumerable<string> HiddenField = null, IEnumerable<string> ShowField = null)
+		public static Type GetElementType(this PropertyInfo Model, int GenericArgument = 0)
+		{
+			var elementType = Model.PropertyType.GetElementType();
+			if (elementType == null)
+			{
+				elementType = Model.PropertyType.GetGenericArguments()[GenericArgument];
+			}
+			return elementType;
+		}
+
+		/// <summary>
+		/// All visual fields in the model
+		/// </summary>
+		/// <param name="Model"></param>
+		/// <returns></returns>
+		public static PropertyInfo[] VisibleProperties(this IEnumerable Model, IEnumerable<string> HiddenField = null, IEnumerable<string> ShowField = null)
         {
             var elementType = Model.GetType().GetElementType();
             if (elementType == null)
@@ -108,9 +163,10 @@ namespace Web.Helpers
         {
             return propertyInfo.GetCustomAttributes(typeof(T), false).FirstOrDefault() as T;
         }
-
-        public static object CreateInstance(this Type type, NameValueCollection collection = null) {
-            object Instance = Activator.CreateInstance(type);
+        
+        public static object CreateInstance(this Type type, NameValueCollection collection = null)
+        {
+            object Instance = type != typeof(string) ? Activator.CreateInstance(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) ? type.GetGenericArguments()[0] : type) : string.Empty;
             if (collection != null)
             {
                 PropertyInfo[] Properties = type.GetProperties();
@@ -129,6 +185,10 @@ namespace Web.Helpers
             return Expression.Lambda<Func<T, R>>(Expression.PropertyOrField(Expression.Constant(model), Info.Name), Expression.Parameter(typeof(T), "a"));
         }
 
+		public static ModelMetadata GetPropMetadata(this HtmlHelper html)
+		{
+			return html.ViewData.ContainsKey("ModelMetadata") ? html.ViewData["ModelMetadata"] as ModelMetadata : html.ViewData.ModelMetadata;
+		}
         
 
         public static String HashPager<T>(this HtmlHelper html, IPagedList<T> data, object args = null)
@@ -210,27 +270,31 @@ namespace Web.Helpers
             }
             else
             {
-                vs["pageIndex"] = page.HasValue ? page.Value : 1;
-                item.InnerHtml += html.ActionLink(text, vs["action"].ToString(), vs);
+                vs["pagedIndex"] = page.HasValue ? page.Value : 1;
+                item.InnerHtml += html.ActionLink(text, vs["action"].ToString(), vs, new Dictionary<string, object> { { "data-goto" , null } });
                 vs.Remove("pageIndex");
             }
 
             return new MvcHtmlString(item.ToString());
         }
 
-        public static IEnumerable<SysAction> GetUserButtons(this HtmlHelper htmlHelper)
+        public static IEnumerable<SysAction> GetUserButtons(this HtmlHelper htmlHelper, string Controller = "")
         {
             var _iCurrentUser = DependencyResolver.Current.GetService<ICurrentUser>();
-            var _iSysActionService = DependencyResolver.Current.GetService<SysActionInterface>();
-            return _iSysActionService.GetAll(
-                a => a.SysControllerSysActions.Any(
-                    b => b.SysRoleSysControllerSysActions.Any(
-                        c => c.SysRole.SysRoleSysUsers.Any(
-                            d => d.SysUserId == _iCurrentUser.Id
-                            )
-                        )
-                    ) && (a.ButtonType != ButtonTypes.None)
-                 ).ToList();
+            var _iSysActionService = DependencyResolver.Current.GetService<ISysActionInterface>();
+			var buttons = _iSysActionService.GetAll(
+				a => a.SysControllerSysActions.Any(
+					b => b.SysRoleSysControllerSysActions.Any(
+						c => c.SysRole.SysRoleSysUsers.Any(
+							d => d.SysUserId == _iCurrentUser.Id
+							)
+						)
+					) && (a.ButtonType != ButtonTypes.None)
+				 );
+			if (!string.IsNullOrEmpty(Controller)) {
+				buttons = buttons.Where(a => a.SysControllerSysActions.Any(b => b.SysController.ControllerName == Controller));
+			}
+			return buttons.ToList();
         }
 
         public static MvcHtmlString RenderToolbar(this UrlHelper urlHelper, IEnumerable<SysAction> Buttons)
@@ -290,7 +354,7 @@ namespace Web.Helpers
                         "Core.BtnAction(\"" + button.ActionName + "\")";
                     break;
                 case ActionTypes.Link:
-                    Button.Attributes["onclick"] = "Core.goToUrl('" + urlHelper.Action(button.ActionName ,new { id }) + "')";
+                    Button.Attributes["data-goto"] =  urlHelper.Action(button.ActionName, new { id });
                     break;
             }
 
@@ -305,13 +369,13 @@ namespace Web.Helpers
         /// <returns></returns>
         public static MvcHtmlString CreateMenuList(this HtmlHelper htmlHelper, UrlHelper Url, ICurrentUser user)
         {
-            var _iSysController = DependencyResolver.Current.GetService<SysControllerInterface>();
+            var _iSysController = DependencyResolver.Current.GetService<ISysControllerInterface>();
 
             var Controller = _iSysController.GetAll(
-                a => a.SysControllerSysActions.Any(
-                    b => b.SysRoleSysControllerSysActions.Any(
-                        c => c.SysRole.SysRoleSysUsers.Any(
-                            d => d.SysUserId.Equals(user.Id.Value)
+                a => a.Display && a.SysControllerSysActions.Any(
+                    b => !b.Deleted && b.SysRoleSysControllerSysActions.Any(
+                        c => !c.Deleted && c.SysRole.SysRoleSysUsers.Any(
+                            d => !d.Deleted && d.SysUserId.Equals(user.Id.Value)
                         )
                     )
                 )
@@ -319,16 +383,12 @@ namespace Web.Helpers
 
             var Code = "000";
             StringBuilder bulider = new StringBuilder();
-
-            long index = DateTime.Now.Millisecond;
-
+            
             foreach (var item in Controller) {
                 if (item.SystemId.Length < Code.Length)
                 {
                     bulider.Append("</ul></li>");
                 }
-
-
                 bulider.Append("<li>");
 
                 var a = new TagBuilder("a");
@@ -348,9 +408,8 @@ namespace Web.Helpers
                 }
                 else
                 {
-                    a.AddCssClass("J_menuItem");
-                    a.Attributes["href"] = "/" + item.SysArea.AreaName + Url.Action(item.ActionName, item.ControllerName);
-                    a.Attributes["data-index"] = (index++).ToString() ;
+                    
+                    a.Attributes["data-goto"] = a.Attributes["href"] = "/" + item.SysArea.AreaName + Url.Action(item.ActionName, item.ControllerName);
                     bulider.Append(a.ToString());
                     bulider.Append("</li>");
                 }
@@ -361,8 +420,91 @@ namespace Web.Helpers
             {
                 bulider.Append("</ul></li>");
             }
-
+            
             return new MvcHtmlString(bulider.ToString());
         }
-    }
+
+		public static string RouteScope(this HtmlHelper htmlHelper)
+		{
+			return string.Format("{0}#{1}#{2}", htmlHelper.ViewContext.RouteData.Values["area"], htmlHelper.ViewContext.RouteData.Values["controller"], htmlHelper.ViewContext.RouteData.Values["index"]).ToMD5();
+		}
+
+		public static void ViewDictForModel(this HtmlHelper html, IEnumerable list, IEnumerable<string> names = null)
+		{
+			var model = GetElementType(list).CreateInstance();
+			if (names == null) names = new string[0];
+			foreach (var prop in model.GetType().GetProperties().Where(a => !names.Contains(a.Name) && a.CustomAttributes.Any(b => typeof(ITranslatable).IsAssignableFrom(b.AttributeType))))
+			{
+				if (html.ViewData[prop.Name] == null)
+				{
+					var Trans = prop.GetAttribute<ITranslatable>();
+					Type type = (typeof(IEnumerable).IsAssignableFrom(prop.PropertyType) && prop.PropertyType != typeof(string)) ? GetElementType(prop) : prop.PropertyType;
+					
+					html.ViewData[prop.Name] = prop.GetViewDict(ValueList(Trans, list, type.CreateInstance() as dynamic, prop) as object);
+				}
+			}
+		}
+		
+		private static  List<T> ValueList<T>(ITranslatable trans, IEnumerable model , T _value, PropertyInfo info)
+		{
+			List<T> list = new List<T>();
+			foreach (var item in model)
+			{
+				var value = info.GetValue(item);
+				if (trans is IEnumerableField)
+				{
+					var ef = trans as IEnumerableField;
+					if (value is string && ef.Multi)
+						list.AddRange(value.ToString().Split(ef.Split).ConvertIEnumerable<T>());
+					else if (item is IEnumerable)
+						list.AddRange((item as IEnumerable).ConvertIEnumerable<T>());
+					else
+						try { list.Add((T)item); } catch { }
+					
+				}
+				else
+				{
+					try { list.Add((T)item); } catch { }
+				}
+			}
+			return list.Distinct().ToList();
+		}
+
+		public static string LookupUrl(this UrlHelper url, LookupAttribute lookup, string lookupId)
+		{
+			string LookUpUrl = string.Empty;
+			switch (lookup.LinkModel)
+			{
+				case LookupLink.None: break;
+				case LookupLink.Link: LookUpUrl = lookup.LinkConfig as string ?? string.Empty; break;
+				case LookupLink.Route:
+					if (lookup.LinkConfig is string)
+					{
+						var routeValue = new RouteValueDictionary(
+							lookup.LinkConfig.ToString().Split(',')
+							.Select(a => { var b = a.Split('='); return new KeyValuePair<string, object>(b[0], b[1]); })
+							.ToDictionary(k => k.Key, v => v.Value)
+							);
+						LookUpUrl = url.RouteUrl(routeValue);
+					}
+					else
+					{
+						LookUpUrl = url.RouteUrl(lookup.LinkConfig);
+					}
+
+					break;
+			}
+			if (!string.IsNullOrEmpty(LookUpUrl))
+			{
+				LookUpUrl += string.Format("?Hids={0}&Multi={1}&Style={2}", lookupId, lookup.Multi, lookup.LookupModel);
+
+				if (!string.IsNullOrEmpty(lookup.Condition))
+				{
+					LookUpUrl += "&" + lookup.Condition;
+				}
+			}
+			return LookUpUrl;
+		}
+
+	}
 }

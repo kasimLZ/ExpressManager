@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Common.Attributes;
 using Common.Linq;
 
 namespace Common
@@ -33,17 +34,19 @@ namespace Common
             PageSize = pageSize;
             PageIndex = index;
             EntityType = typeof(T);
+            List<T> Result;
             try
             {
-                AddRange(source.Skip(((index - 1) * pageSize)).Take(pageSize));
+                Result = source.Skip(((index - 1) * pageSize)).Take(pageSize).ToList() ;
             }
             catch (NotSupportedException e)
             {
                 if (e.Message.Contains("OrderBy"))
-                {
-                    AddRange((IQueryable<T>)source.OrderBy(typeof(T).IdentifierPropertyName()).Skip(((index - 1) * pageSize)).Take(pageSize));
-                }
+                    Result = source.AutoOrder().Skip(((index - 1) * pageSize)).Take(pageSize).ToList();
+                else
+                    throw e;
             }
+            AddRange(Result);
            
         }
 
@@ -63,7 +66,7 @@ namespace Common
 
     public static class Pagination
     {
-        public static int pageSize = 20;
+        public static int pageSize = 15;
 
         public static PagedList<T> ToPagedList<T>(this IQueryable<T> source, int index)
         {
@@ -92,6 +95,19 @@ namespace Common
             return result;
         }
 
+        public static IQueryable<T> AutoOrder<T>(this IQueryable<T> source)
+        {
+            var orderSet = (OrderAttribute) typeof(T).GetCustomAttributes(typeof(OrderAttribute), true).FirstOrDefault();
+            string field = string.Empty, sort = string.Empty;
+            if (orderSet != null)
+            {
+                field = orderSet.Field;
+                sort = orderSet.Order;
+            }
+            if (string.IsNullOrEmpty(field))
+                field = typeof(T).IdentifierPropertyName();
 
+            return (IQueryable<T>)source.OrderBy(string.Format("{0} {1}",field, sort));
+        }
     }
 }

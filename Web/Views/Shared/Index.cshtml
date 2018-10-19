@@ -1,87 +1,92 @@
 ﻿@using System.Reflection
+@using Common.Attributes
+@using Web.Helper;
 @model System.Collections.IEnumerable
 @{
-    IPagedList PageListModel = Model as IPagedList;
-    string primaryKey = Model.GetElementType().IdentifierPropertyName();
+	IPagedList PageListModel = Model as IPagedList;
+	string primaryKey = Model.GetElementType().IdentifierPropertyName();
 
-    var _hideFields = (ViewData["_HideFields"] as string[]);
-    if (_hideFields == null) { _hideFields = new string[0] { }; }
-    var _showFields = (ViewData["_ShowFields"] as string[]);
-    if (_showFields == null) { _showFields = new string[0] { }; }
-
-
-    var field_infos = Model.VisibleProperties(_hideFields, _showFields.MergerArrays(new string[] { primaryKey }));
-
-    var Buttons = Html.GetUserButtons();
-    List<SysAction> Inline = Buttons.Where(a => a.ButtonType == ButtonTypes.InlineButton).ToList();
+	var _hideFields = (ViewData["_HideFields"] as string[]);
+	if (_hideFields == null) { _hideFields = new string[] { }; }
+	var _showFields = (ViewData["_ShowFields"] as string[]);
+	if (_showFields == null) { _showFields = new string[] { }; }
 
 
-    if (PageListModel != null)
-    {
-        ViewData["_PageIndex"] = PageListModel.PageIndex;
-        ViewData["_PageSize"] = PageListModel.PageSize;
-        ViewData["_TotalCount"] = PageListModel.TotalCount;
-    }
+	var field_infos = Model.VisibleProperties(_hideFields, _showFields.MergerArrays(new string[] { primaryKey }));
+
+	var Buttons = Html.GetUserButtons((string)System.Web.HttpContext.Current.Request.RequestContext.RouteData.Values["controller"]);
+	List<SysAction> Inline = Buttons.Where(a => a.ButtonType == ButtonTypes.InlineButton).ToList();
+
+	#region 初始化自动分页参数
+	if (PageListModel != null)
+	{
+		ViewData["_PageIndex"] = PageListModel.PageIndex;
+		ViewData["_PageSize"] = PageListModel.PageSize;
+		ViewData["_TotalCount"] = PageListModel.TotalCount;
+	}
+	#endregion
+
+	Html.ViewDictForModel(Model,_hideFields);
+
+	Dictionary<string, uint> ShowFieldDict = new Dictionary<string, uint>();
 }
-<script>
-    Core.loadScript("Test", function () {
 
-    })
-</script>
-
+@Html.Partial("_Partial_Init_Script", "Index")
 @Html.Partial("Search_Input", (PageListModel != null ? PageListModel.EntityType : Model.GetElementType()).CreateInstance(Request.QueryString))
+
 
 @Url.RenderToolbar(Buttons.Where(a => a.ButtonType == ButtonTypes.PageButton))
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>
-                        <input type="checkbox" class="selectAll" />
-                    </th>
-                    @foreach (PropertyInfo title in field_infos)
-                    {
-                        if (title.Name.Equals(primaryKey))
-                        {
-                            <th>Action</th>
-                        }
-                        else
-                        {
-                            <th>@title.GetLabel().ToSeparatedWords()</th>
-                        }
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    ViewData["DataList"] = item;
-                    var primaryValue = item.GetType().GetProperty(primaryKey).GetValue(item);
+        <div class="table-responsive min-table">
+            <table class="table table-striped table-bordered table-scrollable select-enable" style="margin-top:10px; min-width:1024px">
+                <thead>
                     <tr>
-                        <td><input name="btSelectItem" type="checkbox" value="@primaryValue"></td>
+                        <th>
+                            <input type="checkbox" class="selectAll" />
+                        </th>
                         @foreach (PropertyInfo title in field_infos)
                         {
                             if (title.Name.Equals(primaryKey))
                             {
-                                <td>
-                                    @Url.RenderInlineButton(Inline, primaryValue)
-                                </td>
+                                <th>Action</th>
                             }
                             else
                             {
-                                <td>
-                                    @Html.Display("DataList." + title.Name)
-                                </td>
+                                var SN = title.GetCustomAttributes<ShowNameAttribute>().FirstOrDefault();
+                                if (SN != null) { ShowFieldDict.Add(title.Name, SN.sort); }
+                                <th data-name="@title.Name">@title.GetLabel().ToSeparatedWords()</th>
                             }
                         }
-
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        ViewData["DataList"] = item;
+                        var primaryValue = item.GetType().GetProperty(primaryKey).GetValue(item);
+                        <tr>
+                            <td>
+                                <input type="checkbox" value="@primaryValue">
+                            </td>
+                            @foreach (PropertyInfo title in field_infos)
+                            {
+                                if (title.Name.Equals(primaryKey))
+                                {
+                                    <td>@Url.RenderInlineButton(Inline, primaryValue)</td>
+                                }
+                                else
+                                {
+                                    <td @(ShowFieldDict.ContainsKey(title.Name) ?  " data-showname=\"" + ShowFieldDict[title.Name] + "\"" : "")>@Html.Display("DataList." + title.Name)</td>
+								
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </div>
 @if (ViewData["_PageIndex"] is int && ViewData["_PageSize"] is int && ViewData["_TotalCount"] is int)
 {

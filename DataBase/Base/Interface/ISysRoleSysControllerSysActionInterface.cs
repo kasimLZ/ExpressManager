@@ -3,7 +3,7 @@ using DataBase.Base.Model;
 
 namespace DataBase.Base.Interface
 {
-    public interface SysRoleSysControllerSysActionInterface : IRepositoryBase<SysRoleSysControllerSysAction>
+    public interface ISysRoleSysControllerSysActionInterface : IRepositoryBase<SysRoleSysControllerSysAction>
     {
     }
 }

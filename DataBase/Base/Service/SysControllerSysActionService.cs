@@ -5,7 +5,7 @@ using DataBase.Base.Service.Infrastructure;
 
 namespace DataBase.Base.Service
 {
-    public class SysControllerSysActionService : RepositoryBase<SysControllerSysAction>, SysControllerSysActionInterface
+    public class SysControllerSysActionService : RepositoryBase<SysControllerSysAction>, ISysControllerSysActionInterface
     {
         public SysControllerSysActionService(IDatabaseFactory databaseFactory, ICurrentUser userInfo) 
             : base(databaseFactory, userInfo)

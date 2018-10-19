@@ -1,58 +1,48 @@
 ﻿@using System.Collections
-@{ 
-    var ticket = Guid.NewGuid();
-    }
+@using DataBase.Base.Interface
 
-
-
-@using (Ajax.BeginForm(new AjaxOptions { UpdateTargetId = ticket.ToString() }))
+@Html.Partial("_Partial_Init_Script", "Edit")
+@*@Html.ValidationSummary()*@
+@using (Ajax.BeginForm(new AjaxOptions { UpdateTargetId = "MainBody" }))
 {
-    <div class="form-horizontal">
-        @Html.AntiForgeryToken()
-        @foreach (var prop in ViewData.ModelMetadata.Properties.Where(pm => pm.ShowForEdit && !pm.ModelType.IsAbstract && !ViewData.TemplateInfo.Visited(pm)).OrderBy(a => a.Order))
-        {
-            
-
-            if (prop.HideSurroundingHtml)
-            {
-                @Html.Hidden(prop.PropertyName)
-            }
-            else
-            {
-                <div class="form-group">
-                    <label class="col-sm-2 control-label" for="@prop.PropertyName">
-                        <span class="text-danger">@(prop.IsRequired && @prop.ModelType != typeof(Boolean) ? "*" : "")</span>
-                        @(string.IsNullOrEmpty(prop.DisplayName) ? prop.PropertyName : prop.DisplayName )
-                    </label>
-                    <div class="col-sm-10">
-                        @switch (prop.DataTypeName)
-                        {
-                            case "Lookup":
-                                @Html.Editor(prop.PropertyName, new { ModelMetedata = prop, FullModel = Model });
-                                break;
-                            case "SelectList":
-                            case "MultiSelectList":
-                                if (ViewData[prop.PropertyName] == null) {ViewData[prop.PropertyName] = prop.StuffSelectViewData((Model as object).GetPropValue(prop.PropertyName) as IEnumerable);}
-                                if (ViewData[prop.PropertyName] != null) { goto default; }
-                                break;
-                            default:
-                                @Html.Editor(prop.PropertyName, new { ModelMetedata = prop });
-                                break;
-                        }
-                    </div>
-                </div>
-            }
-        }
-        <div class="form-group">
-            <div class="col-sm-4 col-sm-offset-2">
-                <button class="btn btn-primary" type="submit">Save</button>
-                <a class="btn btn-white" href="javascript:; " onclick="Core.goToUrl('@Url.Action("Index")')">Cancel</a>
-            </div>
-        </div>
-    </div>
-
+	<div class="form-horizontal">
+		@Html.AntiForgeryToken()
+		@foreach (var prop in ViewData.ModelMetadata.Properties.Where(pm => pm.ShowForEdit && !pm.ModelType.IsAbstract && !ViewData.TemplateInfo.Visited(pm)).OrderBy(a => a.Order))
+		{
+			if (prop.HideSurroundingHtml)
+			{
+				@Html.Hidden(prop.PropertyName)
+			}
+			else
+			{
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="@prop.PropertyName">
+						<span class="text-danger">@( prop.IsRequiredField() ? "*" : "")</span>
+						@(string.IsNullOrEmpty(prop.DisplayName) ? prop.PropertyName : prop.DisplayName )
+					</label>
+					<div class="col-sm-10">
+						@switch (prop.DataTypeName)
+						{
+							case "Lookup":
+								@Html.Editor(prop.PropertyName, new { ModelMetedata = prop, FullModel = Model });
+								break;
+							case "SelectList":
+							case "MultiSelectList":
+								if (ViewData[prop.PropertyName] == null) { ViewData[prop.PropertyName] = prop.StuffSelectViewData((Model as object).GetPropValue(prop.PropertyName)); }
+								if (ViewData[prop.PropertyName] != null) { goto default; }
+								break;
+							case "UserDict":
+								ViewData[prop.PropertyName] = prop.StuffUserDictViewData((Model as object).GetPropValue(prop.PropertyName) as string);
+								goto default;
+							default:
+								@Html.Editor(prop.PropertyName, new { ModelMetedata = prop });
+								break;
+						}
+						<span class="help-block m-b-none text-danger">@Html.ValidationMessage(prop.PropertyName)</span>
+					</div>
+				</div>
+			}
+		}
+		@Html.Partial("_Partial_Submit_Button")
+	</div>
 }
-
-<script type="text/javascript" id="@ticket">
-    Core.InitAjaxEdit("@ticket")
-</script>

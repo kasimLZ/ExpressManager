@@ -2,10 +2,10 @@
 @{
     var key = string.Empty.ViewElementId();
 }
-<div>
+<div data-init-component="ico">
     <input type="text" class="form-control" id="icon-@key" name="@Html.NameForModel()" value="@Model" data-show="0" />
     <span class="caret" style="float: right;margin-top: -18px;margin-right: 7px;"></span>
-    <div class="icon-select" id="icon-select-@key">
+    <div class="icon-box" id="icon-select-@key">
         <ul>
             <li><i class="fa fa-adjust"></i></li>
             <li><i class="fa fa-anchor"></i></li>
@@ -597,11 +597,3 @@
         </ul>
     </div>
 </div>
-
-<script>
-    $("#icon-@key").focus(function () { $("#icon-select-@key").show(); })
-    $("#icon-@key").blur(function () { if($(this).data("show") == "0") $("#icon-select-@key").hide(); })
-    $("#icon-select-@key i").click(function () { $("#icon-@key").val($(this).attr("class"));  })
-    $("#icon-select-@key").mousedown(function () { $("#icon-@key").data("show", "1") })
-    $("#icon-select-@key").mouseup(function () { $("#icon-@key").data("show", "0"); $("#icon-@key").focus(); })
-</script>

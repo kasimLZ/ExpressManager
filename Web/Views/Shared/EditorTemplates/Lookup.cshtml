@@ -1,77 +1,67 @@
 ﻿@using Common.Attributes;
 @using System.Reflection;
+@using System.Collections;
+@using System.ComponentModel.DataAnnotations.Schema
 @{
 
     var lookupId = Html.NameForModel().ToString().Replace(".", "_");
     var fullModel = ViewData["FullModel"];
-    var lookup_set = fullModel.GetType().GetProperty(Html.NameForModel().ToString()).GetCustomAttributes().First(a => a is LookupAttribute) as LookupAttribute;
+    var propInfo = fullModel.GetType().GetProperty(Html.NameForModel().ToString());
+    var lookup_set = propInfo.GetCustomAttribute<LookupAttribute>();
 
-    string LookUpUrl = string.Empty;
-    if (!string.IsNullOrEmpty(lookup_set.LinkConfig))
+    IEnumerable<string> items = lookup_set.Multi ?
+        (Model is string ? Model.ToString().Split(lookup_set.Split) : (Model as IEnumerable)?.ConvertIEnumerable<string>()) :
+        new string[] { Model?.ToString() };
+
+
+    var showName = (!lookup_set.Multi && fullModel != null && !string.IsNullOrEmpty(lookup_set.Value))
+                ? ObjectUtils.GetPropValue(fullModel, lookup_set.Value)
+                : (ViewData.ContainsKey(lookupId + "Name")
+                    ? ViewData[lookupId + "Name"]
+                    : Request[lookupId + "Name"]);
+    if (items == null) { goto TraslateNull; }
+    if (showName == null && (lookup_set.Mode & TranslatMode.Dict) != 0)
     {
-        var temp = lookup_set.LinkConfig.ToLower().Split(':');
-        if (temp.Length > 1)
+        IDictionary<string,string> dict = ViewData[propInfo.Name + "_Name"] as IDictionary<string, string>;
+        if (dict != null)
         {
-            switch (temp[0])
-            {
-                case "url": LookUpUrl = lookup_set.LinkConfig.Substring(4); break;
-                case "route":
-                    var dict = new RouteValueDictionary();
-                    string routeName = string.Empty;
-                    foreach (var item in lookup_set.LinkConfig.Substring(6).Split(','))
-                    {
-                        var pair = item.Split('=');
-                        if (pair.Length >= 2)
-                        {
-                            string key = pair[0], value = item.Substring(pair[0].Length);
-                            if (key.ToLower().Equals("routename"))
-                            {
-                                routeName = value;
-                            }
-                            else
-                            {
-                                dict.Add(pair[0], item.Substring(pair[0].Length));
-                            }
-                        }
-                    }
-                    LookUpUrl = Url.RouteUrl(string.IsNullOrEmpty(routeName) ? "default": routeName, dict);
-                    break;
-            }
+            showName = string.Join(", ", items.Select(a => dict.ContainsKey(a) ? dict[a] : string.Empty));
         }
     }
-    //var showName = (!lookup_set.Multi && fullModel != null && !string.IsNullOrEmpty(lookupAttr.ShowName))
-    //    ? ObjectUtils.GetPropValue(fullModel, lookupAttr.ShowName)
-    //    : (ViewData.ContainsKey(lookupId + "Name") ? ViewData[lookupId + "Name"] : Request[lookupId + "Name"]);
-    LookUpUrl += "?Hids=" + lookupId + "&Multi=" + lookup_set.Multi + "&Style=" + lookup_set.LookupType;
-
-    if (!string.IsNullOrEmpty(lookup_set.Condition))
+    if (showName == null && (lookup_set.Mode & TranslatMode.Property) != 0)
     {
-        LookUpUrl += "&" + lookup_set.Condition;
-    }
-
-}
-<div class="input-group">
-    @if (lookup_set.Multi)
-    {
-        var itemIds = Html.ValueForModel().ToString();
-        if (string.IsNullOrEmpty(itemIds))
+        if (lookup_set.Multi)
         {
-            @Html.HiddenFor(a => a);
+            var datafor = propInfo.GetCustomAttribute<DataForAttribute>();
+            if (datafor != null && !string.IsNullOrEmpty(datafor.DataScoure) && !string.IsNullOrEmpty(datafor.ShowName))
+            {
+                showName = string.Join(", ", fullModel.GetEnumerableValue(datafor.DataScoure, datafor.ShowName) ?? new string[0]);
+            }
         }
         else
         {
-            foreach (var itemId in itemIds.Split(','))
+            if (showName == null && fullModel != null && !string.IsNullOrEmpty(lookup_set.Value))
             {
-                <input type="hidden" name="@(lookupId)" value="@(itemId)" />
+                var fk = propInfo.GetCustomAttribute<ForeignKeyAttribute>();
+                showName = ObjectUtils.GetPropValue(fullModel, fk == null ? lookup_set.Value : (fk.Name + "." + lookup_set.Value));
             }
-            //showName = ViewData[lookupId + "Name"];
+            if (showName == null) { showName = Model; }
         }
     }
-    else
+    TraslateNull:
+}
+
+<div class="input-group" @Html.Raw(lookup_set.LinkModel != LookupLink.None ? "data-init-component=\"lookup\"" : "")>
+    @if (items != null)
     {
-        @Html.HiddenFor(a => a);
+        foreach (var i in items)
+         {
+             <input type="hidden" name="@(lookupId)" value="@(i)"/>
+         }
     }
-    <input id="@(lookupId)Name" type="text" class="form-control input-lookup" readonly="readonly" value="showName"><span class="input-group-btn">
-        <button type="button" class="btn btn-success btn-lookup" data-url="@LookUpUrl">Choosen</button>
+   
+    <input id="@(lookupId)Name" name="@(lookupId)Name" type="text" class="form-control input-lookup" readonly="readonly" value="@showName">
+    <span class="input-group-btn">
+        <button id="@(lookupId)-Btn-Search" type="button" class="btn btn-success btn-lookup" data-url="@Url.LookupUrl(lookup_set, lookupId)" data-name-field="@lookup_set.Value" data-key-field="@lookup_set.Key">选择</button>
     </span>
 </div>

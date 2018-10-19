@@ -12,11 +12,11 @@ namespace DataBase.Base.Service.Infrastructure
 {
     public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
-        // Fields
-        private readonly IDatabaseFactory _databaseFactory;
-        private readonly IApplicationDb _dataContext;
-        private readonly IDbSet<T> _dbset;
-        public readonly ICurrentUser _userInfo;
+		// Fields
+		protected readonly IDatabaseFactory _databaseFactory;
+        protected readonly IApplicationDb _dataContext;
+		protected readonly IDbSet<T> _dbset;
+        protected readonly ICurrentUser _userInfo;
 
         protected RepositoryBase(IDatabaseFactory databaseFactory, ICurrentUser userInfo)
         {
@@ -60,7 +60,7 @@ namespace DataBase.Base.Service.Infrastructure
             IDbSetBase base2 = item as IDbSetBase;
             if (base2 != null)
             {
-                base2.Deleted = true;
+				base2.Deleted = true;
             }
         }
 
@@ -74,16 +74,17 @@ namespace DataBase.Base.Service.Infrastructure
 
         public virtual IQueryable<T> GetAll()
         {
-            return this.GetAll(true);
+            return this.GetAll(false);
         }
 
         public virtual IQueryable<T> GetAll(bool delete)
         {
-            var field = typeof(T).GetProperties().FirstOrDefault(a => a.Name.ToLower().Equals("deleted"));
+            var field = typeof(T).GetProperties().FirstOrDefault(a => a.Name.Equals("Deleted", StringComparison.CurrentCultureIgnoreCase));
             Expression<Func<T, bool>> express;
-            if (field != null && field.GetType() == typeof(bool))
+            if (field != null && field.PropertyType == typeof(bool))
             {
-                express = Expression.Lambda<Func<T, bool>>(Expression.Equal(Expression.Property(Expression.Parameter(typeof(T), "a"), "Delete"), Expression.Constant(delete)));
+                var Parameter = Expression.Parameter(typeof(T), "a");
+                express = Expression.Lambda<Func<T, bool>>(Expression.Equal(Expression.PropertyOrField(Parameter, field.Name), Expression.Constant(delete)), Parameter);
             }
             else
             {

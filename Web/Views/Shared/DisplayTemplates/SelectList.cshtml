@@ -1,0 +1,18 @@
+﻿@{
+	var meta = Html.GetPropMetadata();
+	string porpName = meta.PropertyName ?? TempData["UserDict_PropertyName"].ToString();
+	IEnumerable<SelectListItem> select = ViewData[porpName] as IEnumerable<SelectListItem>;
+	if (select == null) { goto UnKnown; }
+	var item = select.FirstOrDefault(a => a.Value.Equals(Model?.ToString()));
+}
+@if (item != null)
+{
+	@item.Text
+}
+
+@{
+	goto Finish;
+	UnKnown:;
+	@Model
+	Finish:;
+}

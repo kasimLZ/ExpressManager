@@ -6,7 +6,6 @@ namespace DataBase.Base.Model
 {
     public class SysControllerSysAction : DbSetBase
     {
-        // Properties
         public virtual SysAction SysAction { get; set; }
 
         [ForeignKey("SysAction")]

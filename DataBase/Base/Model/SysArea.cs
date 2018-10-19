@@ -18,11 +18,11 @@ namespace DataBase.Base.Model
         /// 区域名称（项目文件夹）
         /// </summary>
         public string AreaName { get; set; }
-
+        
         /// <summary>
         /// 控制器外键
         /// </summary>
-        public ICollection<SysController> SysControllers { get; set; }
+        public virtual ICollection<SysController> SysControllers { get; set; }
         
         /// <summary>
         /// 是否启用

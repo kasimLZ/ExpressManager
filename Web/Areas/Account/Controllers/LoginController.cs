@@ -13,9 +13,9 @@ namespace Web.Areas.Account.Controllers
     public class LoginController : Controller
     {
        
-        private readonly SysUserInfoInterface _iSysUserService;
+        private readonly ISysUserInfoInterface _iSysUserService;
 
-        public LoginController(SysUserInfoInterface iSysUserService)
+        public LoginController(ISysUserInfoInterface iSysUserService)
         {
             _iSysUserService = iSysUserService;
         }

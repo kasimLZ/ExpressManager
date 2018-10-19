@@ -23,12 +23,12 @@ namespace Web.Helper
             }
         }
 
-        public int? Id
+        public long? Id
         {
             get
             {
-                int id = 0;
-                if (int.TryParse(UserInfo["UserId"], out id))
+                long id = 0;
+                if (long.TryParse(UserInfo["UserId"], out id))
                     return id;
                 else
                     return null;
@@ -41,6 +41,13 @@ namespace Web.Helper
             }
         }
         
+        public string HeadIcon
+        {
+            get
+            {
+                return UserInfo["HeadIcon"];
+            }
+        }
 
         public NameValueCollection Cookie {
 
